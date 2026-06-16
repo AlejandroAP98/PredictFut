@@ -38,17 +38,6 @@ export default function Home() {
         predMap[p.match_id] = { home_score: p.home_score, away_score: p.away_score }
       })
       setPredictions(predMap)
-
-      const { data: scoresData } = await supabase
-        .from('scores')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-
-      if (scoresData) {
-        setScores(scoresData.match_scores || {})
-        setTotalPoints(scoresData.total_points || 0)
-      }
     } finally {
       setLoading(false)
     }
@@ -59,6 +48,8 @@ export default function Home() {
   useEffect(() => {
     if (matchesLoading) return
     const finishedMatches = allMatches.filter(m => m.finished === 'TRUE')
+    if (finishedMatches.length === 0) return
+
     const newScores = {}
     let tp = 0
 
@@ -75,19 +66,17 @@ export default function Home() {
     setScores(newScores)
     setTotalPoints(tp)
 
-    if (finishedMatches.length > 0) {
-      const scoresStr = JSON.stringify(newScores)
-      if (tp !== lastSavedRef.current.points || scoresStr !== lastSavedRef.current.scores) {
-        lastSavedRef.current = { points: tp, scores: scoresStr }
-        ;(async () => {
-          await supabase.from('scores').upsert({
-            user_id: user.id, total_points: tp, match_scores: newScores,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' })
-        })()
-      }
+    const scoresStr = JSON.stringify(newScores)
+    if (tp !== lastSavedRef.current.points || scoresStr !== lastSavedRef.current.scores) {
+      lastSavedRef.current = { points: tp, scores: scoresStr }
+      ;(async () => {
+        await supabase.from('scores').upsert({
+          user_id: user.id, total_points: tp, match_scores: newScores,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' })
+      })()
     }
-  }, [allMatches, matchesLoading])
+  }, [allMatches, matchesLoading, predictions])
 
   const handlePredictionChange = (matchId, homeScore, awayScore) => {
     setPredictions(prev => ({ ...prev, [matchId]: { home_score: homeScore, away_score: awayScore } }))
@@ -128,7 +117,7 @@ export default function Home() {
         }}
       />
 
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-gray-200">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-linear-to-b from-white/90 via-white/70 to-white/0 border-b border-emerald-200/70 ">
         <div className="max-w-6xl mx-auto px-4 py-3 flex  justify-between w-full">
           <div className="flex items-center gap-2 shrink-0">
             <img src={Logo} alt="WC2026 Logo" className="h-8 w-auto" />
@@ -139,7 +128,7 @@ export default function Home() {
           <div className="flex items-center gap-2 w-full justify-end">
             <button
               onClick={() => setShowLeaderboard(!showLeaderboard)}
-              className="bg-white cursor-pointer hover:bg-gray-50 px-4 py-2 sm:px-2 sm:py-2 rounded-xl text-sm font-medium transition-all duration-200 border border-gray-200 hover:border-gray-300 text-gray-600 flex items-center gap-1.5"
+              className="bg-white cursor-pointer hover:bg-emerald-50 px-4 py-2 sm:px-2 sm:py-2 rounded-xl text-sm font-medium transition-all duration-200 border border-gray-200 hover:border-emerald-200 text-gray-600 flex items-center gap-1.5"
             >
               {showLeaderboard ? (
                 <>
@@ -169,7 +158,7 @@ export default function Home() {
           <Leaderboard currentUserId={user.id} />
         ) : (
           <>
-          <div className="flex flex-col items-center w-full justify-between gap-1 mb-2">
+          <div className="flex flex-col items-center w-full justify-between gap-1">
             <div className="grid grid-cols-3 gap-1 sm:w-1/2">
               <div className="bg-white/60 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center border border-gray-200">
                 <div className="text-amber-600 font-bold text-lg font-score leading-tight">{totalPoints}</div>

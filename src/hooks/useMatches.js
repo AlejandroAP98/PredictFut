@@ -97,8 +97,36 @@ export function useMatches() {
   }, [fetchMatches])
 
   useEffect(() => {
-    const interval = setInterval(() => fetchMatches(false), POLL_INTERVAL)
-    return () => clearInterval(interval)
+    let interval = null
+
+    const stopPolling = () => {
+      if (interval) {
+        clearInterval(interval)
+        interval = null
+      }
+    }
+
+    const startPolling = () => {
+      stopPolling()
+      interval = setInterval(() => fetchMatches(false), POLL_INTERVAL)
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopPolling()
+      } else {
+        fetchMatches(false)
+        startPolling()
+      }
+    }
+
+    startPolling()
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      stopPolling()
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [fetchMatches])
 
   const getMatchesByDate = useCallback((dateKey) => {

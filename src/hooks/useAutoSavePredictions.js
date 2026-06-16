@@ -4,9 +4,12 @@ import { supabase } from '../lib/supabase'
 export function useAutoSavePredictions(userId, predictions, delay = 1500) {
   const timeoutRef = useRef(null)
   const prevPredictionsRef = useRef({})
+  const predictionsRef = useRef(predictions)
+  predictionsRef.current = predictions
 
   const savePredictions = useCallback(async () => {
-    const predictionsToSave = Object.entries(predictions)
+    const current = predictionsRef.current
+    const predictionsToSave = Object.entries(current)
       .filter(([matchId, pred]) => {
         const prev = prevPredictionsRef.current[matchId]
         return !prev || prev.home_score !== pred.home_score || prev.away_score !== pred.away_score
@@ -25,9 +28,9 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
       .upsert(predictionsToSave, { onConflict: 'user_id,match_id' })
 
     if (!error) {
-      prevPredictionsRef.current = JSON.parse(JSON.stringify(predictions))
+      prevPredictionsRef.current = JSON.parse(JSON.stringify(current))
     }
-  }, [userId, predictions])
+  }, [userId])
 
   useEffect(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
