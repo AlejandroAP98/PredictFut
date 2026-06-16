@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 const TYPE_BADGES = {
-  group: 'bg-emerald-50 text-black border-emerald-200',
+  group: 'bg-orange-300 text-white border-orange-300',
   r32: 'bg-purple-50 text-purple-700 border-purple-200',
   r16: 'bg-purple-50 text-purple-700 border-purple-200',
   qf: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -11,12 +11,12 @@ const TYPE_BADGES = {
 }
 
 const TYPE_LABELS = {
-  group: 'Group Stage',
-  r32: 'Round of 32',
-  r16: 'Round of 16',
-  qf: 'Quarter Final',
-  sf: 'Semi Final',
-  third: '3rd Place',
+  group: 'Grupos',
+  r32: 'Octavos de Final',
+  r16: 'Cuartos de Final',
+  qf: 'Semifinales',
+  sf: 'Final',
+  third: 'Tercer lugar',
   final: 'FINAL',
 }
 
@@ -35,9 +35,9 @@ function Countdown({ kickoff }) {
   const hours = Math.floor((diff % 86400000) / 3600000)
   const mins = Math.floor((diff % 3600000) / 60000)
 
-  if (days > 0) return <span className="text-gray-400 text-[10px] sm:text-xs">{days}d {hours}h</span>
-  if (hours > 0) return <span className="text-emerald-600 text-[10px] sm:text-xs font-medium">{hours}h {mins}m</span>
-  return <span className="text-emerald-600 text-[10px] sm:text-xs font-medium animate-pulse">{mins}m</span>
+  if (days > 0) return <span className="text-gray-400 text-[10px] sm:text-xs font-score font-semibold">{days}d {hours}h</span>
+  if (hours > 0) return <span className="text-emerald-600 text-[10px] sm:text-xs font-semibold font-score ">{hours}h {mins}m</span>
+  return <span className="text-emerald-600 text-[10px] sm:text-xs font-semibold font-score animate-pulse">{mins}m</span>
 }
 
 export default function MatchCard({ match, prediction, score, locked, onPredictionChange, getFlag, getName }) {
@@ -92,7 +92,7 @@ export default function MatchCard({ match, prediction, score, locked, onPredicti
             Grupo {matchType === 'group' ? group : typeLabel}
           </span>
           <span className="text-gray-500 text-[11px] sm:text-sm whitespace-nowrap">{dateStr}</span>
-          <span className="text-gray-800 font-semibold text-[11px] sm:text-sm whitespace-nowrap">{timeStr}</span>
+          <span className="text-gray-800 font-semibold font-score text-[11px] sm:text-sm whitespace-nowrap">{timeStr}</span>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {isLive && (
@@ -102,7 +102,10 @@ export default function MatchCard({ match, prediction, score, locked, onPredicti
             </span>
           )}
           {!isFinished && !isLive && !isTBD && (
+            <>
+            <span className="text-gray-400 sm:text-sm"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-alarm" height={20} strokeWidth={1.25} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M5 13a7 7 0 1 0 14 0 7 7 0 1 0-14 0"/><path d="M12 10v3h2M7 4 4.25 6M17 4l2.75 2"/></svg></span>
             <Countdown kickoff={kickoff} />
+            </>
           )}
           {getScoreBadge()}
         </div>

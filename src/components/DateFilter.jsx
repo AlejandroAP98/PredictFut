@@ -22,7 +22,7 @@ export default function DateFilter({ dates, selectedDate, onDateChange, todayMat
     <div className="relative z-10">
       <button
             onClick={() => onDateChange(today)}
-            className={`px-1 py-1 rounded-sm text-xs font-semibold whitespace-nowrap transition-all duration-200  my-2 ${
+            className={`px-1 py-2 rounded-sm text-xs font-semibold whitespace-nowrap transition-all duration-200  ${
               selectedDate === today
                 ? 'text-gray-500 cursor-default  '
                 : ' text-white  hover:text-emerald-600 cursor-pointer underline  '
@@ -42,7 +42,7 @@ export default function DateFilter({ dates, selectedDate, onDateChange, todayMat
       <div className="relative group">
         <button
           onClick={() => scroll('left')}
-          className="hidden sm:flex absolute cursor-pointer left-0 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-8 h-8 rounded-full bg-white/90 border border-gray-200 shadow-md text-gray-500 hover:text-emerald-600 hover:border-emerald-300 hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100"
+          className="flex absolute cursor-pointer left-0 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-8 h-8 rounded-full bg-white/90 border border-gray-200 shadow-md text-gray-500 hover:text-emerald-600 hover:border-emerald-300 hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100"
           aria-label="Anterior"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -85,7 +85,7 @@ export default function DateFilter({ dates, selectedDate, onDateChange, todayMat
 
         <button
           onClick={() => scroll('right')}
-          className="hidden sm:flex absolute cursor-pointer right-0 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-8 h-8 rounded-full bg-white/90 border border-gray-200 shadow-md text-gray-500 hover:text-emerald-600 hover:border-emerald-300 hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100"
+          className="flex absolute cursor-pointer right-0 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-8 h-8 rounded-full bg-white/90 border border-gray-200 shadow-md text-gray-500 hover:text-emerald-600 hover:border-emerald-300 hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100"
           aria-label="Siguiente"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>

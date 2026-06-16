@@ -118,7 +118,7 @@ export default function Home() {
       />
 
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-linear-to-b from-white/90 via-white/70 to-white/0 border-b border-emerald-200/70 ">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex  justify-between w-full">
+        <div className="max-w-6xl mx-auto px-4 py-2 flex  justify-between w-full">
           <div className="flex items-center gap-2 shrink-0">
             <img src={Logo} alt="WC2026 Logo" className="h-8 w-auto" />
             <div>
@@ -133,12 +133,12 @@ export default function Home() {
               {showLeaderboard ? (
                 <>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-calendar" height={22} strokeWidth={1} width={22} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm12-4v4M8 3v4m-4 4h16m-9 4h1m0 0v3"/></svg>
-                  <span className="hidden sm:inline">Partidos</span>
+                  <span className="inline ">Partidos</span>
                 </>
               ) : (
                 <>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-scoreboard" height={22} strokeWidth={1} width={22} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9-2v2m0 3v1m0 3v1m0 3v1M7 3v2m10-2v2"/><path d="M15 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0-3 0M6 9h1.5a1.5 1.5 0 0 1 0 3H7h.5a1.5 1.5 0 0 1 0 3H6"/></svg>
-                  <span className="hidden sm:inline">Ranking</span>
+                  <span className="inline">Ranking</span>
                 </>
               )}
             </button>
@@ -153,13 +153,13 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 relative z-10">
+      <main className="max-w-6xl mx-auto px-4 py-2 relative z-10">
         {showLeaderboard ? (
           <Leaderboard currentUserId={user.id} />
         ) : (
           <>
           <div className="flex flex-col items-center w-full justify-between gap-1">
-            <div className="grid grid-cols-3 gap-1 sm:w-1/2">
+            <div className="grid grid-cols-3 gap-2 sm:w-1/2">
               <div className="bg-white/60 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center border border-gray-200">
                 <div className="text-amber-600 font-bold text-lg font-score leading-tight">{totalPoints}</div>
                 <div className="text-amber-500 font-bold text-[10px] font-score uppercase tracking-wide">Puntos</div>
@@ -176,7 +176,7 @@ export default function Home() {
             <span className="text-sm text-gray-800 font-medium font-score">{userDisplayName}</span>
           </div>
           
-            <div className="mb-6">
+            <div className="mb-4">
               <DateFilter
                 dates={dates}
                 selectedDate={selectedDate}
@@ -188,7 +188,7 @@ export default function Home() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-800">
                 {selectedDate === todayDateKey ? (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-end justify-center gap-2">
                     <span className="text-gray-800 font-bold text-md">Hoy</span>
                     <span className="px-2 py-0.5 text-xs bg-emerald-50 text-emerald-600 rounded-full border border-emerald-200">
                       {new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
@@ -198,11 +198,8 @@ export default function Home() {
                   new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
                 )}
               </h2>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <ScoreRulesTooltip />
-                <span className="text-sm text-gray-700">
-                  {filteredMatches.length} partido{filteredMatches.length !== 1 ? 's' : ''}
-                </span>
               </div>
             </div>
 

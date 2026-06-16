@@ -20,8 +20,9 @@ export default function ScoreRulesTooltip() {
         onMouseLeave={() => setIsOpen(false)}
         className="flex items-center gap-1 text-xs text-gray-500 hover:text-emerald-600 transition-colors cursor-pointer bg-transparent border-none"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-shirt-sport" height={20} strokeWidth={2} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z" /><path d="m15 4 6 2v5h-3v8a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-8H3V6l6-2a3 3 0 0 0 6 0" /><path d="M10.5 11H13l-1.5 5" /></svg>
-        <span className="hidden sm:inline">Sistema de Puntaje</span>
+        <span className="inline underline underline-offset-2">Sistema de Puntaje</span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-soccer-field" height={24} strokeWidth={1} width={24} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 1 0-6 0M3 9h3v6H3zm15 0h3v6h-3z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9-2v14"/></svg>
+        
       </button>
 
       {isOpen && (
