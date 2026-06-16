@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import Logo from '../assets/Logo.svg'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -26,15 +27,20 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-white">
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: 'radial-gradient(125% 125% at 50% 90%, #f5f5f5 20%, #10b981 100%)',
+            backgroundSize: '100% 100%',
+          }}
+        />
       <div className="w-full max-w-md">
-        <div className="text-center mb-8 animate-fadeIn">
-          <span className="text-6xl block mb-4 font-bold text-emerald-600">WC</span>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">World Cup 2026</h1>
-          <p className="text-gray-500 text-lg">Predictor Mundial</p>
-        </div>
-
         <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-xl animate-slideUp">
+          <div className="text-center mb-4 animate-fadeIn">
+          <img src={Logo} alt="Logo" className="w-20 sm:w-36 h-20 sm:h-36 mx-auto mb-4" />
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-2">PredicFut</h1>
+        </div>
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl text-sm">
