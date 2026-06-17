@@ -5,7 +5,7 @@ import { formatDateKey, isMatchLocked, calculatePredictionScore } from '../lib/a
 import { calculateSkillBonus, AI_PREDICTION_BONUS } from '../lib/skills'
 import { useMatches } from '../hooks/useMatches'
 import { useTeams } from '../hooks/useTeams'
-import { useAutoSavePredictions } from '../hooks/useAutoSavePredictions'
+import { useAutoSavePredictions, deletePrediction } from '../hooks/useAutoSavePredictions'
 import { useSkills } from '../hooks/useSkills'
 import { useGroups } from '../hooks/useGroups'
 import { useAIPredictions } from '../hooks/useAIPredictions'
@@ -149,7 +149,16 @@ export default function Home() {
   }, [allMatches, matchesLoading, predictions, equipped, skillBonuses, pointsSpent, refetchSkills, aiPredictions])
 
   const handlePredictionChange = (matchId, homeScore, awayScore) => {
-    setPredictions(prev => ({ ...prev, [matchId]: { home_score: homeScore, away_score: awayScore } }))
+    if (homeScore === '' && awayScore === '') {
+      setPredictions(prev => {
+        const next = { ...prev }
+        delete next[matchId]
+        return next
+      })
+      deletePrediction(user.id, matchId)
+    } else {
+      setPredictions(prev => ({ ...prev, [matchId]: { home_score: homeScore, away_score: awayScore } }))
+    }
   }
 
   const handleEquipSkill = async (userSkillId, matchId, teamChoice) => {
@@ -189,11 +198,7 @@ export default function Home() {
         delete next[matchId]
         return next
       })
-      await supabase
-        .from('predictions')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('match_id', matchId)
+      await deletePrediction(user.id, matchId)
     }
   }
 
@@ -204,8 +209,8 @@ export default function Home() {
       let updated = false
       for (const [matchId, aiPred] of Object.entries(aiPredictions)) {
         const current = next[matchId]
-        const needsSync = !current
-          || (current.home_score === '' && current.away_score === '')
+        if (!current) continue
+        const needsSync = (current.home_score === '' && current.away_score === '')
           || (String(current.home_score) === String(aiPred.home_score) && String(current.away_score) === String(aiPred.away_score))
         if (needsSync) {
           next[matchId] = { home_score: String(aiPred.home_score), away_score: String(aiPred.away_score) }

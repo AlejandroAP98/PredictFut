@@ -9,14 +9,13 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
 
   const savePredictions = useCallback(async () => {
     const current = predictionsRef.current
-    const changed = Object.entries(current)
+    const toUpsert = Object.entries(current)
+      .filter(([, pred]) => pred.home_score !== '' && pred.away_score !== '')
       .filter(([matchId, pred]) => {
         const prev = prevPredictionsRef.current[matchId]
-        return !prev || prev.home_score !== pred.home_score || prev.away_score !== pred.away_score
+        if (!prev) return true
+        return prev.home_score !== pred.home_score || prev.away_score !== pred.away_score
       })
-
-    const toUpsert = changed
-      .filter(([, pred]) => pred.home_score !== '' && pred.away_score !== '')
       .map(([matchId, pred]) => ({
         user_id: userId,
         match_id: matchId,
@@ -24,31 +23,14 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
         away_score: pred.away_score,
       }))
 
-    const removedKeys = Object.keys(prevPredictionsRef.current)
-      .filter(matchId => !(matchId in current))
-
-    const toDelete = changed
-      .filter(([, pred]) => pred.home_score === '' && pred.away_score === '')
-      .map(([matchId]) => matchId)
-      .concat(removedKeys)
-
-    if (toUpsert.length > 0 || toDelete.length > 0) {
-      const nextPrev = JSON.parse(JSON.stringify(current))
-      prevPredictionsRef.current = nextPrev
-    }
-
     if (toUpsert.length > 0) {
-      await supabase
+      const { error } = await supabase
         .from('predictions')
         .upsert(toUpsert, { onConflict: 'user_id,match_id' })
-    }
 
-    if (toDelete.length > 0) {
-      await supabase
-        .from('predictions')
-        .delete()
-        .eq('user_id', userId)
-        .in('match_id', toDelete)
+      if (!error) {
+        prevPredictionsRef.current = JSON.parse(JSON.stringify(current))
+      }
     }
   }, [userId])
 
@@ -63,4 +45,12 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
   }, [predictions, delay, savePredictions])
+}
+
+export async function deletePrediction(userId, matchId) {
+  await supabase
+    .from('predictions')
+    .delete()
+    .eq('user_id', userId)
+    .eq('match_id', matchId)
 }
