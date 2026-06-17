@@ -189,6 +189,11 @@ export default function Home() {
         delete next[matchId]
         return next
       })
+      await supabase
+        .from('predictions')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('match_id', matchId)
     }
   }
 
