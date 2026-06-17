@@ -37,45 +37,19 @@ export default function ScoreRulesTooltip() {
           <div className="flex items-center gap-2 mb-3">
             <button
               onClick={() => setShowSkills(false)}
-              className={`text-sm font-bold transition-colors pb-1 ${!showSkills ? 'text-gray-800 border-b-2 border-emerald-500' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`text-sm font-semibold transition-colors pb-1 ${!showSkills ? 'text-gray-800 border-b-2 border-emerald-500' : 'text-gray-400 hover:text-gray-600'}`}
             >
               Puntaje
             </button>
             <button
               onClick={() => setShowSkills(true)}
-              className={`text-sm font-bold transition-colors pb-1 ${showSkills ? 'text-gray-800 border-b-2 border-emerald-500' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`text-sm font-semibold transition-colors pb-1 ${showSkills ? 'text-gray-800 border-b-2 border-emerald-500' : 'text-gray-400 hover:text-gray-600'}`}
             >
               Habilidades
             </button>
           </div>
 
           {!showSkills ? (
-            <div className="space-y-2.5">
-              <div className="flex items-start gap-2.5">
-                <span className="shrink-0 w-7 h-6 rounded-md bg-emerald-100 text-emerald-600 font-bold text-xs flex items-center justify-center mt-0.5">+5</span>
-                <span className="text-xs text-gray-600"><strong className="text-gray-800">Tendencia:</strong> Acertar ganador o empate.</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <span className="shrink-0 w-7 h-6 rounded-md bg-emerald-100 text-emerald-600 font-bold text-xs flex items-center justify-center mt-0.5">+1</span>
-                <span className="text-xs text-gray-600"><strong className="text-gray-800">Goles Local:</strong> Acertar goles del local.</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <span className="shrink-0 w-7 h-6 rounded-md bg-emerald-100 text-emerald-600 font-bold text-xs flex items-center justify-center mt-0.5">+1</span>
-                <span className="text-xs text-gray-600"><strong className="text-gray-800">Goles Visita:</strong> Acertar goles del visitante.</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <span className="shrink-0 w-7 h-6 rounded-md bg-emerald-100 text-emerald-600 font-bold text-xs flex items-center justify-center mt-0.5">+1</span>
-                <span className="text-xs text-gray-600"><strong className="text-gray-800">Diferencia:</strong> Acertar diferencia de goles.</span>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <span className="shrink-0 w-7 h-6 rounded-md bg-yellow-100 text-yellow-600 font-bold text-xs flex items-center justify-center mt-0.5">+2</span>
-                <span className="text-xs text-gray-600"><strong className="text-gray-800">Bono Pleno:</strong> Marcador exacto.</span>
-              </div>
-              <div className="mt-3 pt-2.5 border-t border-gray-100">
-                <p className="text-xs text-gray-400"><strong className="text-gray-500">Máximo 10 pts</strong> por partido.</p>
-              </div>
-            </div>
-          ) : (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <VarShieldIcon size={20} className="text-gray-400" />
@@ -116,6 +90,33 @@ export default function ScoreRulesTooltip() {
                 <p className="text-[10px] text-gray-400"><strong className="text-gray-500">3 reclamos/día</strong> · 1° gratis · 2° -2 pts · 3° -4 pts · Máx 3 en inventario · 1 por partido</p>
               </div>
             </div>
+          ) : (
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 w-7 h-6 rounded-md bg-emerald-100 text-emerald-600 font-bold text-xs flex items-center justify-center mt-0.5">+5</span>
+                <span className="text-xs text-gray-600"><strong className="text-gray-800">Tendencia:</strong> Acertar ganador o empate.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 w-7 h-6 rounded-md bg-emerald-100 text-emerald-600 font-bold text-xs flex items-center justify-center mt-0.5">+1</span>
+                <span className="text-xs text-gray-600"><strong className="text-gray-800">Goles Local:</strong> Acertar goles del local.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 w-7 h-6 rounded-md bg-emerald-100 text-emerald-600 font-bold text-xs flex items-center justify-center mt-0.5">+1</span>
+                <span className="text-xs text-gray-600"><strong className="text-gray-800">Goles Visita:</strong> Acertar goles del visitante.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 w-7 h-6 rounded-md bg-emerald-100 text-emerald-600 font-bold text-xs flex items-center justify-center mt-0.5">+1</span>
+                <span className="text-xs text-gray-600"><strong className="text-gray-800">Diferencia:</strong> Acertar diferencia de goles.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 w-7 h-6 rounded-md bg-yellow-100 text-yellow-600 font-bold text-xs flex items-center justify-center mt-0.5">+2</span>
+                <span className="text-xs text-gray-600"><strong className="text-gray-800">Bono Pleno:</strong> Marcador exacto.</span>
+              </div>
+              <div className="mt-3 pt-2.5 border-t border-gray-100">
+                <p className="text-xs text-gray-400"><strong className="text-gray-500">Máximo 10 pts</strong> por partido.</p>
+              </div>
+            </div>
+            
           )}
         </div>
       )}

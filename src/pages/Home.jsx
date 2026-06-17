@@ -7,9 +7,11 @@ import { useMatches } from '../hooks/useMatches'
 import { useTeams } from '../hooks/useTeams'
 import { useAutoSavePredictions } from '../hooks/useAutoSavePredictions'
 import { useSkills } from '../hooks/useSkills'
+import { useGroups } from '../hooks/useGroups'
 import MatchCard from '../components/MatchCard'
 import DateFilter from '../components/DateFilter'
 import Leaderboard from '../components/Leaderboard'
+import GroupTables from '../components/GroupTables'
 import RouletteModal from '../components/RouletteModal'
 import LoaderIcon from '../assets/icons/LoaderIcon.tsx'
 import ScoreRulesTooltip from '../components/ScoreRulesTooltip'
@@ -18,7 +20,8 @@ import Logo from '../assets/Logo.svg'
 export default function Home() {
   const { user, signOut } = useAuth()
   const { allMatches, loading: matchesLoading, getMatchesByDate, getAllDates } = useMatches()
-  const { getFlag, getName } = useTeams()
+  const { teams, getFlag, getName } = useTeams()
+  const { groups, loading: groupsLoading, getTeamInfo } = useGroups(teams)
   const [predictions, setPredictions] = useState({})
   const [selectedDate, setSelectedDate] = useState(formatDateKey(new Date()))
   const [scores, setScores] = useState({})
@@ -26,6 +29,8 @@ export default function Home() {
   const [totalPoints, setTotalPoints] = useState(0)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [showRoulette, setShowRoulette] = useState(false)
+  const [showMobileNav, setShowMobileNav] = useState(false)
+  const [showGroups, setShowGroups] = useState(false)
   const [loading, setLoading] = useState(true)
   const lastSavedRef = useRef({ points: -1, scores: '{}', bonuses: '{}' })
 
@@ -194,14 +199,16 @@ export default function Home() {
       />
 
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-linear-to-b from-white/90 via-white/70 to-white/0 border-b border-emerald-200/70">
-        <div className="max-w-6xl mx-auto px-4 py-2 flex justify-between w-full">
+        <div className="max-w-6xl mx-auto px-4 py-2 flex justify-between items-center w-full">
           <div className="flex items-center gap-2 shrink-0">
             <img src={Logo} alt="WC2026 Logo" className="h-8 w-auto" />
             <div>
               <h1 className="text-lg font-bold text-emerald-700 leading-tight">PredictFut</h1>
             </div>
           </div>
-          <div className="flex items-center sm:gap-2 gap-1 w-full justify-end">
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center sm:gap-2 gap-1 w-full justify-end">
             <button
               onClick={() => setShowRoulette(true)}
               className="bg-linear-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 cursor-pointer px-2 py-2 sm:px-2 sm:py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-white shadow-md shadow-amber-200/50 flex items-center gap-1.5"
@@ -210,34 +217,96 @@ export default function Home() {
               <span className="inline">Skills</span>
             </button>
             <button
-              onClick={() => setShowLeaderboard(!showLeaderboard)}
-              className="bg-white cursor-pointer hover:bg-emerald-50 px-2 py-1.5 sm:px-2 sm:py-2 rounded-xl text-sm font-medium transition-all duration-200 text-gray-600 flex items-center gap-1.5"
+              onClick={() => { setShowLeaderboard(false); setShowGroups(false); }}
+              className={`cursor-pointer px-2 py-1.5 sm:px-2 sm:py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${!showLeaderboard && !showGroups ? 'bg-emerald-50 text-emerald-600' : 'bg-white hover:bg-emerald-50 text-gray-600'}`}
             >
-              {showLeaderboard ? (
-                <>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-calendar" height={24} strokeWidth={1} width={24} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm12-4v4M8 3v4m-4 4h16m-9 4h1m0 0v3"/></svg>
-                  <span className="inline">Partidos</span>
-                </>
-              ) : (
-                <>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-scoreboard" height={24} strokeWidth={1} width={24} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9-2v2m0 3v1m0 3v1m0 3v1M7 3v2m10-2v2"/><path d="M15 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0-3 0M6 9h1.5a1.5 1.5 0 0 1 0 3H7h.5a1.5 1.5 0 0 1 0 3H6"/></svg>
-                  <span className="inline">Ranking</span>
-                </>
-              )}
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-calendar" height={24} strokeWidth={1} width={24} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm12-4v4M8 3v4m-4 4h16m-9 4h1m0 0v3"/></svg>
+              <span className="inline">Partidos</span>
+            </button>
+            <button
+              onClick={() => { setShowLeaderboard(true); setShowGroups(false); }}
+              className={`cursor-pointer px-2 py-1.5 sm:px-2 sm:py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${showLeaderboard ? 'bg-emerald-50 text-emerald-600' : 'bg-white hover:bg-emerald-50 text-gray-600'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-scoreboard" height={24} strokeWidth={1} width={24} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9-2v2m0 3v1m0 3v1m0 3v1M7 3v2m10-2v2"/><path d="M15 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0-3 0M6 9h1.5a1.5 1.5 0 0 1 0 3H7h.5a1.5 1.5 0 0 1 0 3H6"/></svg>
+              <span className="inline">Ranking</span>
+            </button>
+            <button
+              onClick={() => { setShowGroups(true); setShowLeaderboard(false); }}
+              className={`cursor-pointer px-2 py-1.5 sm:px-2 sm:py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${showGroups ? 'bg-emerald-50 text-emerald-600' : 'bg-white hover:bg-emerald-50 text-gray-600'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-shirt-sport" height={24} strokeWidth={1} width={24} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="m15 4 6 2v5h-3v8a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-8H3V6l6-2a3 3 0 0 0 6 0"/><path d="M10.5 11H13l-1.5 5"/></svg>
+              <span className="inline">Grupos</span>
             </button>
             <button
               onClick={() => signOut()}
-              className="bg-white cursor-pointer hover:bg-red-50 px-2 py-2.5 sm:px-2 sm:py-2.5 rounded-xl text-sm transition-all duration-200  text-gray-500 hover:text-red-500 flex items-center gap-1.5"
+              className="bg-white cursor-pointer hover:bg-red-50 px-2 py-2.5 sm:px-2 sm:py-2.5 rounded-xl text-sm transition-all duration-200 text-gray-500 hover:text-red-500 flex items-center gap-1.5"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               <span className="hidden sm:inline">Salir</span>
             </button>
           </div>
+
+          {/* Mobile: Skills + hamburger */}
+          <div className="flex md:hidden items-center gap-1">
+            <button
+              onClick={() => setShowRoulette(true)}
+              className="bg-linear-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 cursor-pointer px-2 py-2 rounded-xl text-sm font-bold transition-all duration-200 text-white shadow-md shadow-amber-200/50 flex items-center gap-1.5"
+            >
+              <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-star" height={20} strokeWidth={1.5} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="m12 17.75-6.172 3.245 1.179-6.873-5-4.867 6.9-1 3.086-6.253 3.086 6.253 6.9 1-5 4.867 1.179 6.873z"/></svg>
+              <span className="inline">Skills</span>
+            </button>
+            <button
+              onClick={() => setShowMobileNav(!showMobileNav)}
+              className="bg-white cursor-pointer hover:bg-emerald-50 px-1.5 py-1.5 rounded-xl text-gray-600 transition-all duration-200"
+            >
+              {showMobileNav ? (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" height={24} strokeWidth={2} width={24} viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" height={24} strokeWidth={2} width={24} viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {showMobileNav && (
+          <div className="md:hidden bg-white/95 backdrop-blur-xl border-b border-emerald-200/70 px-4 py-3 space-y-1 animate-fadeIn">
+            <button
+              onClick={() => { setShowLeaderboard(false); setShowGroups(false); setShowMobileNav(false); }}
+              className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-3 ${!showLeaderboard && !showGroups ? 'text-emerald-600 bg-emerald-50' : 'text-gray-600 hover:bg-emerald-50'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-calendar" height={20} strokeWidth={1} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm12-4v4M8 3v4m-4 4h16m-9 4h1m0 0v3"/></svg>
+              Partidos
+            </button>
+            <button
+              onClick={() => { setShowLeaderboard(true); setShowGroups(false); setShowMobileNav(false); }}
+              className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-3 ${showLeaderboard ? 'text-emerald-600 bg-emerald-50' : 'text-gray-600 hover:bg-emerald-50'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-scoreboard" height={20} strokeWidth={1} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9-2v2m0 3v1m0 3v1m0 3v1M7 3v2m10-2v2"/><path d="M15 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0-3 0M6 9h1.5a1.5 1.5 0 0 1 0 3H7h.5a1.5 1.5 0 0 1 0 3H6"/></svg>
+              Ranking
+            </button>
+            <button
+              onClick={() => { setShowGroups(true); setShowLeaderboard(false); setShowMobileNav(false); }}
+              className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-3 ${showGroups ? 'text-emerald-600 bg-emerald-50' : 'text-gray-600 hover:bg-emerald-50'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-shirt-sport" height={20} strokeWidth={1} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="m15 4 6 2v5h-3v8a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-8H3V6l6-2a3 3 0 0 0 6 0"/><path d="M10.5 11H13l-1.5 5"/></svg>
+              Grupos
+            </button>
+            <button
+              onClick={() => signOut()}
+              className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all duration-200 flex items-center gap-3"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Salir
+            </button>
+          </div>
+        )}
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-2 relative z-10">
-        {showLeaderboard ? (
+      <main className="max-w-6xl mx-auto px-2 sm:px-4 py-2 relative z-10">
+        {showGroups ? (
+          <GroupTables groups={groups} loading={groupsLoading} getTeamInfo={getTeamInfo} />
+        ) : showLeaderboard ? (
           <Leaderboard currentUserId={user.id} />
         ) : (
           <>
