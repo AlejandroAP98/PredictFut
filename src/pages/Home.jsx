@@ -184,10 +184,11 @@ export default function Home() {
   const handleCancelAIPrediction = async (matchId) => {
     const success = await cancelAIPrediction(matchId)
     if (success) {
-      setPredictions(prev => ({
-        ...prev,
-        [matchId]: { home_score: '', away_score: '' },
-      }))
+      setPredictions(prev => {
+        const next = { ...prev }
+        delete next[matchId]
+        return next
+      })
     }
   }
 

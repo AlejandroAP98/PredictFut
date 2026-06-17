@@ -9,11 +9,14 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
 
   const savePredictions = useCallback(async () => {
     const current = predictionsRef.current
-    const predictionsToSave = Object.entries(current)
+    const changed = Object.entries(current)
       .filter(([matchId, pred]) => {
         const prev = prevPredictionsRef.current[matchId]
         return !prev || prev.home_score !== pred.home_score || prev.away_score !== pred.away_score
       })
+
+    const toUpsert = changed
+      .filter(([, pred]) => pred.home_score !== '' && pred.away_score !== '')
       .map(([matchId, pred]) => ({
         user_id: userId,
         match_id: matchId,
@@ -21,13 +24,25 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
         away_score: pred.away_score,
       }))
 
-    if (predictionsToSave.length === 0) return
+    const toDelete = changed
+      .filter(([, pred]) => pred.home_score === '' && pred.away_score === '')
+      .map(([matchId]) => matchId)
 
-    const { error } = await supabase
-      .from('predictions')
-      .upsert(predictionsToSave, { onConflict: 'user_id,match_id' })
+    if (toUpsert.length > 0) {
+      await supabase
+        .from('predictions')
+        .upsert(toUpsert, { onConflict: 'user_id,match_id' })
+    }
 
-    if (!error) {
+    if (toDelete.length > 0) {
+      await supabase
+        .from('predictions')
+        .delete()
+        .eq('user_id', userId)
+        .in('match_id', toDelete)
+    }
+
+    if (toUpsert.length > 0 || toDelete.length > 0) {
       prevPredictionsRef.current = JSON.parse(JSON.stringify(current))
     }
   }, [userId])
