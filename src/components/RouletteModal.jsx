@@ -72,7 +72,7 @@ export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining,
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative bg-white flex flex-col rounded-2xl shadow-2xl border border-gray-200 w-full max-w-sm h-2/3 overflow-y-auto animate-slideUp"
+        className="relative bg-white flex flex-col rounded-2xl shadow-2xl border border-gray-200 w-full max-w-sm h-auto overflow-y-auto animate-slideUp"
         onClick={e => e.stopPropagation()}
       >
         <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-100 z-10">
