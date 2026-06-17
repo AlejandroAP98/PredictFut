@@ -55,6 +55,7 @@ export const SKILL_CATALOG = [
 export const SPIN_COSTS = { 1: 0, 2: 2, 3: 4 }
 export const MAX_DAILY_SPINS = 3
 export const MAX_INVENTORY_SIZE = 3
+export const AI_PREDICTION_BONUS = 3
 
 export const RARITY_COLORS = {
   common: { bg: 'bg-gray-100', border: 'border-gray-300', text: 'text-gray-700', glow: '' },

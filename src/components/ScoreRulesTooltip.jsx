@@ -86,6 +86,15 @@ export default function ScoreRulesTooltip() {
                   <p className="text-[10px] text-gray-400">Asegura +5 pts de Tendencia.</p>
                 </div>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="shrink-0 w-5 h-5 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center mt-0.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-robot" height={20} strokeWidth={1.25} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M6 6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2zm6-4v2m-3 8v9m6-9v9M5 16l4-2m6 0 4 2M9 18h6M10 8v.01M14 8v.01"/></svg>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-600"><strong className="text-gray-800">IA Dependencia</strong> <span className="text-emerald-500">Gratis</span></span>
+                  <p className="text-[10px] text-gray-400">Genera un marcador aleatorio. Si coincide con el resultado final: +3 pts.</p>
+                </div>
+              </div>
               <div className="mt-3 pt-2.5 border-t border-gray-100">
                 <p className="text-[10px] text-gray-400"><strong className="text-gray-500">3 reclamos/día</strong> · 1° gratis · 2° -2 pts · 3° -4 pts · Máx 3 en inventario · 1 por partido</p>
               </div>

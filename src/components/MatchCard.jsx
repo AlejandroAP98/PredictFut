@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { SKILL_CATALOG, RARITY_COLORS, RARITY_LABELS } from '../lib/skills'
+import { SKILL_CATALOG, RARITY_COLORS, RARITY_LABELS, AI_PREDICTION_BONUS } from '../lib/skills'
 import SkillEquipPopup from './SkillEquipPopup'
 import SkillIcon from './SkillIcon'
 
@@ -43,7 +43,7 @@ function Countdown({ kickoff }) {
   return <span className="text-emerald-600 text-[10px] sm:text-xs font-semibold font-score animate-pulse">{mins}m</span>
 }
 
-export default function MatchCard({ match, prediction, score, skillBonus, locked, onPredictionChange, getFlag, getName, equippedSkill, inventory, onEquipSkill, onUnequipSkill }) {
+export default function MatchCard({ match, prediction, score, skillBonus, aiBonus, aiPrediction, locked, onPredictionChange, getFlag, getName, equippedSkill, inventory, onEquipSkill, onUnequipSkill, onGenerateAIPrediction, onCancelAIPrediction }) {
   const [showEquipPopup, setShowEquipPopup] = useState(false)
   const popupRef = useRef(null)
 
@@ -72,6 +72,7 @@ export default function MatchCard({ match, prediction, score, skillBonus, locked
   const isLive = !isFinished && match.time_elapsed !== 'notstarted'
   const actualHome = isFinished ? parseInt(match.home_score) : null
   const actualAway = isFinished ? parseInt(match.away_score) : null
+  const predictionLocked = locked || !!aiPrediction
 
   const badgeColors = TYPE_BADGES[matchType] || TYPE_BADGES.group
   const typeLabel = TYPE_LABELS[matchType] || group
@@ -124,7 +125,52 @@ export default function MatchCard({ match, prediction, score, skillBonus, locked
           {getScoreBadge()}
         </div>
       </div>
-
+      {/* AI Dependencia section */}
+      {!isTBD && !aiPrediction && !locked && !isFinished && prediction.home_score === '' && prediction.away_score === '' && (
+        <div className="mt-1 w-full sm:w-fit sm:mx-6 sm:px-0 px-28 ">
+          <button
+            onClick={() => onGenerateAIPrediction && onGenerateAIPrediction(match.id)}
+            className="w-full flex cursor-pointer items-center justify-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium border border-dashed border-emerald-300 text-emerald-600 hover:border-emerald-400 hover:text-emerald-700 hover:bg-emerald-50/50 transition-all"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-robot" height={20} strokeWidth={1.25} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M6 6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2zm6-4v2m-3 8v9m6-9v9M5 16l4-2m6 0 4 2M9 18h6M10 8v.01M14 8v.01"/></svg>
+          <span className='text-xs'>IA Dependencia</span>
+          </button>
+        </div>
+      )}
+      {!isTBD && aiPrediction && !locked && !isFinished && (
+        <div className="mt-1">
+          <button
+            onClick={() => onCancelAIPrediction && onCancelAIPrediction(match.id)}
+            className="w-full flex cursor-pointer items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all"
+          >
+            <span className="flex items-center gap-1.5 text-xs">
+              IA Dependencia activa
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-robot-off" height={20} strokeWidth={1.25} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M8 4h8a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2m-4 0H8a2 2 0 0 1-2-2V6m6-4v2m-3 8v9m6-6v6M5 16l4-2m0 4h6M14 8v.01M3 3l18 18"/></svg>
+           </button>
+        </div>
+      )}
+      {!isTBD && aiPrediction && (locked || isFinished) && (
+        <div className="mt-2">
+          <div className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+            isFinished && aiBonus > 0
+              ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+              : 'border-gray-200 bg-gray-50 text-gray-500'
+          }`}>
+            <span className="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-robot" height={20} strokeWidth={1.25} width={20} viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M6 6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2zm6-4v2m-3 8v9m6-9v9M5 16l4-2m6 0 4 2M9 18h6M10 8v.01M14 8v.01"/></svg>
+              <span className='text-xs'>IA: {aiPrediction.home_score} - {aiPrediction.away_score}</span>
+            </span>
+            {isFinished && aiBonus > 0 ? (
+              <span className="font-bold">+{AI_PREDICTION_BONUS} pts!</span>
+            ) : isFinished ? (
+              <span className="text-gray-400">Sin bono</span>
+            ) : (
+              <span className="text-gray-400">En espera</span>
+            )}
+          </div>
+        </div>
+      )}
       <div className="p-3 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="flex sm:flex-1 items-center justify-between sm:justify-end sm:gap-3 min-w-0">
@@ -151,36 +197,48 @@ export default function MatchCard({ match, prediction, score, skillBonus, locked
               </div>
             ) : (
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <input
-                  type="number"
-                  min="0" max="20"
-                  value={prediction.home_score}
-                  onChange={(e) => onPredictionChange(match.id, e.target.value, prediction.away_score)}
-                  disabled={locked}
-                  className={`w-14 sm:w-16 h-12 sm:h-14 text-center text-xl sm:text-2xl font-score font-bold rounded-xl border-2 transition-all ${
-                    !locked && !isTBD
-                      ? 'bg-white border-gray-300 text-emerald-600 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 focus:outline-none'
-                      : 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed'
-                  }`}
-                  placeholder="-"
-                />
-                <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-gray-300 text-[10px] sm:text-xs font-bold">VS</span>
-                  {isTBD && <span className="text-gray-300 text-[8px] sm:text-[10px]">TBD</span>}
-                </div>
-                <input
-                  type="number"
-                  min="0" max="20"
-                  value={prediction.away_score}
-                  onChange={(e) => onPredictionChange(match.id, prediction.home_score, e.target.value)}
-                  disabled={locked}
-                  className={`w-14 sm:w-16 h-12 sm:h-14 text-center text-xl sm:text-2xl font-score font-bold rounded-xl border-2 transition-all ${
-                    !locked && !isTBD
-                      ? 'bg-white border-gray-300 text-emerald-600 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 focus:outline-none'
-                      : 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed'
-                  }`}
-                  placeholder="-"
-                />
+                {aiPrediction && !isFinished ? (
+                  <>
+                    <div className="w-14 sm:w-16 h-12 sm:h-14 flex items-center justify-center text-xl sm:text-2xl font-score font-bold rounded-xl border-2 bg-purple-50 border-purple-300 text-purple-500">IA</div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-gray-300 text-[10px] sm:text-xs font-bold">VS</span>
+                    </div>
+                    <div className="w-14 sm:w-16 h-12 sm:h-14 flex items-center justify-center text-xl sm:text-2xl font-score font-bold rounded-xl border-2 bg-purple-50 border-purple-300 text-purple-500">IA</div>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="number"
+                      min="0" max="20"
+                      value={prediction.home_score}
+                      onChange={(e) => onPredictionChange(match.id, e.target.value, prediction.away_score)}
+                      disabled={predictionLocked}
+                      className={`w-14 sm:w-16 h-12 sm:h-14 text-center text-xl sm:text-2xl font-score font-bold rounded-xl border-2 transition-all ${
+                        !predictionLocked && !isTBD
+                          ? 'bg-white border-gray-300 text-emerald-600 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 focus:outline-none'
+                          : 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed'
+                      }`}
+                      placeholder="-"
+                    />
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-gray-300 text-[10px] sm:text-xs font-bold">VS</span>
+                      {isTBD && <span className="text-gray-300 text-[8px] sm:text-[10px]">TBD</span>}
+                    </div>
+                    <input
+                      type="number"
+                      min="0" max="20"
+                      value={prediction.away_score}
+                      onChange={(e) => onPredictionChange(match.id, prediction.home_score, e.target.value)}
+                      disabled={predictionLocked}
+                      className={`w-14 sm:w-16 h-12 sm:h-14 text-center text-xl sm:text-2xl font-score font-bold rounded-xl border-2 transition-all ${
+                        !predictionLocked && !isTBD
+                          ? 'bg-white border-gray-300 text-emerald-600 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 focus:outline-none'
+                          : 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed'
+                      }`}
+                      placeholder="-"
+                    />
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -206,20 +264,19 @@ export default function MatchCard({ match, prediction, score, skillBonus, locked
             <span className="text-[10px] sm:text-xs bg-gray-100 text-gray-400 px-3 py-1 rounded-full">Teams to be determined</span>
           </div>
         )}
-        {locked && !isFinished && !isTBD && (
+        {predictionLocked && !isFinished && !isTBD && (
           <div className="text-center mt-3">
             <span className="text-[10px] sm:text-xs bg-red-50 text-red-500 px-3 py-1 rounded-full border border-red-100">
-              Predictions locked - match in progress
+              {locked ? 'Predictions locked - match in progress' : 'IA Dependencia'}
             </span>
           </div>
         )}
         {isFinished && score !== undefined && score > 0 && (
           <div className="text-center mt-2">
-            <span className="text-[10px] sm:text-xs text-emerald-600">+{score + (skillBonus || 0)} points{skillBonus > 0 ? ` (+${skillBonus} habilidad)` : ''}</span>
+            <span className="text-[10px] sm:text-xs text-emerald-600">+{score + (skillBonus || 0) + (aiBonus || 0)} points{skillBonus > 0 ? ` (+${skillBonus} habilidad)` : ''}{aiBonus > 0 ? ` (+${aiBonus} IA)` : ''}</span>
           </div>
         )}
-
-        {!locked && !isFinished && !isTBD && (
+        {!predictionLocked && !isFinished && !isTBD && (
           <div className="mt-2 relative" ref={popupRef}>
             {equippedSkill ? (() => {
               const skillInfo = SKILL_CATALOG.find(s => s.id === equippedSkill.skill_id)

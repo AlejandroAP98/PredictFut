@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { formatDateKey, isMatchLocked, calculatePredictionScore } from '../lib/api'
-import { calculateSkillBonus } from '../lib/skills'
+import { calculateSkillBonus, AI_PREDICTION_BONUS } from '../lib/skills'
 import { useMatches } from '../hooks/useMatches'
 import { useTeams } from '../hooks/useTeams'
 import { useAutoSavePredictions } from '../hooks/useAutoSavePredictions'
 import { useSkills } from '../hooks/useSkills'
 import { useGroups } from '../hooks/useGroups'
+import { useAIPredictions } from '../hooks/useAIPredictions'
 import MatchCard from '../components/MatchCard'
 import DateFilter from '../components/DateFilter'
 import Leaderboard from '../components/Leaderboard'
@@ -26,18 +27,21 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState(formatDateKey(new Date()))
   const [scores, setScores] = useState({})
   const [skillBonuses, setSkillBonuses] = useState({})
+  const [aiBonuses, setAiBonuses] = useState({})
   const [totalPoints, setTotalPoints] = useState(0)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [showRoulette, setShowRoulette] = useState(false)
   const [showMobileNav, setShowMobileNav] = useState(false)
   const [showGroups, setShowGroups] = useState(false)
   const [loading, setLoading] = useState(true)
-  const lastSavedRef = useRef({ points: -1, scores: '{}', bonuses: '{}' })
+  const lastSavedRef = useRef({ points: -1, scores: '{}', bonuses: '{}', aiBonuses: '{}' })
 
   const {
     inventory, equipped, totalActive, equippedByMatch, spinsRemaining, nextSpinCost,
     pointsSpent, spin, equipSkill, unequipSkill, discardSkill, refetch: refetchSkills,
   } = useSkills(user.id)
+
+  const { predictions: aiPredictions, generate: generateAIPrediction, cancel: cancelAIPrediction, getPrediction: getAIPrediction, calculateBonuses: calculateAIBonuses } = useAIPredictions(user.id)
 
   useAutoSavePredictions(user.id, predictions)
 
@@ -111,19 +115,26 @@ export default function Home() {
       }
     }
 
+    const { bonuses: newAIBonuses, total: aiBonusTotal } = calculateAIBonuses(finishedMatches, newScores)
+    for (const [matchId, bonus] of Object.entries(newAIBonuses)) {
+      tp += bonus
+    }
+
     tp -= pointsSpent
 
     setScores(newScores)
+    setAiBonuses(newAIBonuses)
     setTotalPoints(tp)
 
     const scoresStr = JSON.stringify(newScores)
     const bonusesStr = JSON.stringify(newBonuses)
-    if (tp !== lastSavedRef.current.points || scoresStr !== lastSavedRef.current.scores || bonusesStr !== lastSavedRef.current.bonuses) {
-      lastSavedRef.current = { points: tp, scores: scoresStr, bonuses: bonusesStr }
+    const aiBonusesStr = JSON.stringify(newAIBonuses)
+    if (tp !== lastSavedRef.current.points || scoresStr !== lastSavedRef.current.scores || bonusesStr !== lastSavedRef.current.bonuses || aiBonusesStr !== lastSavedRef.current.aiBonuses) {
+      lastSavedRef.current = { points: tp, scores: scoresStr, bonuses: bonusesStr, aiBonuses: aiBonusesStr }
       ;(async () => {
         await supabase.from('scores').upsert({
           user_id: user.id, total_points: tp, match_scores: newScores,
-          skill_bonuses: newBonuses, updated_at: new Date().toISOString(),
+          skill_bonuses: newBonuses, ai_bonuses: newAIBonuses, updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
 
         const finishedMatchIds = new Set(finishedMatches.map(m => m.id))
@@ -135,7 +146,7 @@ export default function Home() {
         }
       })()
     }
-  }, [allMatches, matchesLoading, predictions, equipped, skillBonuses, pointsSpent, refetchSkills])
+  }, [allMatches, matchesLoading, predictions, equipped, skillBonuses, pointsSpent, refetchSkills, aiPredictions])
 
   const handlePredictionChange = (matchId, homeScore, awayScore) => {
     setPredictions(prev => ({ ...prev, [matchId]: { home_score: homeScore, away_score: awayScore } }))
@@ -160,6 +171,45 @@ export default function Home() {
     await discardSkill(skillId)
   }
 
+  const handleGenerateAIPrediction = async (matchId) => {
+    const result = await generateAIPrediction(matchId)
+    if (result) {
+      setPredictions(prev => ({
+        ...prev,
+        [matchId]: { home_score: String(result.home_score), away_score: String(result.away_score) },
+      }))
+    }
+  }
+
+  const handleCancelAIPrediction = async (matchId) => {
+    const success = await cancelAIPrediction(matchId)
+    if (success) {
+      setPredictions(prev => ({
+        ...prev,
+        [matchId]: { home_score: '', away_score: '' },
+      }))
+    }
+  }
+
+  useEffect(() => {
+    if (Object.keys(aiPredictions).length === 0) return
+    setPredictions(prev => {
+      const next = { ...prev }
+      let updated = false
+      for (const [matchId, aiPred] of Object.entries(aiPredictions)) {
+        const current = next[matchId]
+        const needsSync = !current
+          || (current.home_score === '' && current.away_score === '')
+          || (String(current.home_score) === String(aiPred.home_score) && String(current.away_score) === String(aiPred.away_score))
+        if (needsSync) {
+          next[matchId] = { home_score: String(aiPred.home_score), away_score: String(aiPred.away_score) }
+          updated = true
+        }
+      }
+      return updated ? next : prev
+    })
+  }, [aiPredictions])
+
   const filteredMatches = getMatchesByDate(selectedDate)
   const dates = getAllDates()
   const userDisplayName = user.user_metadata?.name || user.email
@@ -168,6 +218,9 @@ export default function Home() {
   const predictionCount = Object.keys(predictions).filter(k => predictions[k].home_score !== '' && predictions[k].away_score !== '').length
   const scoredMatches = Object.values(scores).filter(s => s > 0).length
   const totalSkillBonuses = Object.entries(skillBonuses).reduce((sum, [mid, b]) => {
+    return scores[mid] !== undefined ? sum + b : sum
+  }, 0)
+  const totalAIBonuses = Object.entries(aiBonuses).reduce((sum, [mid, b]) => {
     return scores[mid] !== undefined ? sum + b : sum
   }, 0)
 
@@ -313,7 +366,7 @@ export default function Home() {
           <div className="flex flex-col items-center w-full justify-between gap-1">
             <div className="grid grid-cols-3 gap-2 sm:w-1/2">
               <div className="bg-white/60 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center border border-gray-200">
-                <div className="text-amber-600 font-bold text-lg font-score leading-tight">{totalPoints}{totalSkillBonuses > 0 ? <span className="text-amber-400 text-xs"> (+{totalSkillBonuses})</span> : null}</div>
+                <div className="text-amber-600 font-bold text-lg font-score leading-tight">{totalPoints}{totalSkillBonuses > 0 || totalAIBonuses > 0 ? <span className="text-amber-400 text-xs"> ({totalSkillBonuses > 0 ? `+${totalSkillBonuses}hab` : ''}{totalSkillBonuses > 0 && totalAIBonuses > 0 ? ', ' : ''}{totalAIBonuses > 0 ? `+${totalAIBonuses}IA` : ''})</span> : null}</div>
                 <div className="text-amber-500 font-bold text-[10px] font-score uppercase tracking-wide">Puntos</div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center border border-gray-200">
@@ -373,6 +426,8 @@ export default function Home() {
                       prediction={predictions[match.id] || { home_score: '', away_score: '' }}
                       score={scores[match.id]}
                       skillBonus={skillBonuses[match.id] || 0}
+                      aiBonus={aiBonuses[match.id] || 0}
+                      aiPrediction={getAIPrediction(match.id)}
                       locked={isMatchLocked(match)}
                       onPredictionChange={handlePredictionChange}
                       getFlag={getFlag}
@@ -381,6 +436,8 @@ export default function Home() {
                       inventory={inventory}
                       onEquipSkill={handleEquipSkill}
                       onUnequipSkill={handleUnequipSkill}
+                      onGenerateAIPrediction={handleGenerateAIPrediction}
+                      onCancelAIPrediction={handleCancelAIPrediction}
                     />
                   </div>
                 ))}
