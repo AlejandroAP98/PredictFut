@@ -61,7 +61,7 @@ export default function Home() {
 
       const predMap = {}
       predsRes.data?.forEach(p => {
-        predMap[p.match_id] = { home_score: p.home_score, away_score: p.away_score }
+        predMap[p.match_id] = { home_score: String(p.home_score), away_score: String(p.away_score) }
       })
       setPredictions(predMap)
 

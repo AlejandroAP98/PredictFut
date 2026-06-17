@@ -10,7 +10,7 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
   const savePredictions = useCallback(async () => {
     const current = predictionsRef.current
     const toUpsert = Object.entries(current)
-      .filter(([, pred]) => pred.home_score !== '' && pred.away_score !== '')
+      .filter(([, pred]) => pred.home_score !== '' || pred.away_score !== '')
       .filter(([matchId, pred]) => {
         const prev = prevPredictionsRef.current[matchId]
         if (!prev) return true
@@ -19,8 +19,8 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
       .map(([matchId, pred]) => ({
         user_id: userId,
         match_id: matchId,
-        home_score: pred.home_score,
-        away_score: pred.away_score,
+        home_score: pred.home_score === '' ? 0 : pred.home_score,
+        away_score: pred.away_score === '' ? 0 : pred.away_score,
       }))
 
     if (toUpsert.length > 0) {
