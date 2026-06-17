@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { SKILL_CATALOG, RARITY_COLORS, RARITY_LABELS } from '../lib/skills'
+import SkillEquipPopup from './SkillEquipPopup'
+import SkillIcon from './SkillIcon'
 
 const TYPE_BADGES = {
   group: 'bg-orange-300 text-white border-orange-300',
@@ -40,7 +43,18 @@ function Countdown({ kickoff }) {
   return <span className="text-emerald-600 text-[10px] sm:text-xs font-semibold font-score animate-pulse">{mins}m</span>
 }
 
-export default function MatchCard({ match, prediction, score, locked, onPredictionChange, getFlag, getName }) {
+export default function MatchCard({ match, prediction, score, skillBonus, locked, onPredictionChange, getFlag, getName, equippedSkill, inventory, onEquipSkill, onUnequipSkill }) {
+  const [showEquipPopup, setShowEquipPopup] = useState(false)
+  const popupRef = useRef(null)
+
+  useEffect(() => {
+    if (!showEquipPopup) return
+    function handleClickOutside(e) {
+      if (popupRef.current && !popupRef.current.contains(e.target)) setShowEquipPopup(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showEquipPopup])
   const kickoff = match.kickoff_utc instanceof Date ? match.kickoff_utc : new Date(match.kickoff_utc)
   const timeStr = kickoff.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: true })
   const dateStr = kickoff.toLocaleDateString('es-CO', { weekday: 'short', month: 'short', day: 'numeric' })
@@ -201,7 +215,50 @@ export default function MatchCard({ match, prediction, score, locked, onPredicti
         )}
         {isFinished && score !== undefined && score > 0 && (
           <div className="text-center mt-2">
-            <span className="text-[10px] sm:text-xs text-emerald-600">+{score} points</span>
+            <span className="text-[10px] sm:text-xs text-emerald-600">+{score + (skillBonus || 0)} points{skillBonus > 0 ? ` (+${skillBonus} habilidad)` : ''}</span>
+          </div>
+        )}
+
+        {!locked && !isFinished && !isTBD && (
+          <div className="mt-2 relative" ref={popupRef}>
+            {equippedSkill ? (() => {
+              const skillInfo = SKILL_CATALOG.find(s => s.id === equippedSkill.skill_id)
+              const colors = skillInfo ? RARITY_COLORS[skillInfo.rarity] : RARITY_COLORS.common
+              const skillConfig = equippedSkill.skill_config || {}
+              const teamLabel = skillConfig.team === 'home' ? 'Local' : skillConfig.team === 'away' ? 'Visita' : ''
+              return (
+                <button
+                  onClick={() => onUnequipSkill && onUnequipSkill(equippedSkill.id)}
+                  className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${colors.border} ${colors.bg} ${colors.text} hover:opacity-80`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <SkillIcon icon={skillInfo?.icon} size={14} />
+                    <span>{skillInfo?.name}{teamLabel ? ` → ${teamLabel}` : ''}</span>
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50 hover:opacity-100"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              )
+            })() : inventory && inventory.length > 0 ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowEquipPopup(!showEquipPopup)}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-dashed border-gray-300 text-gray-400 hover:border-emerald-400 hover:text-emerald-500 hover:bg-emerald-50/50 transition-all"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14m-7-7h14"/></svg>
+                  Equipar habilidad
+                </button>
+                {showEquipPopup && (
+                  <SkillEquipPopup
+                    inventory={inventory}
+                    matchId={match.id}
+                    homeName={homeName}
+                    awayName={awayName}
+                    onEquip={onEquipSkill}
+                    onClose={() => setShowEquipPopup(false)}
+                  />
+                )}
+              </div>
+            ) : null}
           </div>
         )}
       </div>

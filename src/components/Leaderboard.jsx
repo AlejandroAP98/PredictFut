@@ -92,10 +92,10 @@ export default function Leaderboard({ currentUserId }) {
                   {user.rank}
                 </div>
 
-                <div className="col-span-5 flex items-center gap-3 min-w-0">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
+                <div className="col-span-7 sm:col-span-5 flex items-center gap-2 min-w-0">
+                  <div className={`w-9 h-9 flex rounded-full items-center justify-center text-sm font-bold shrink-0 ${
                     user.rank === 1 ? 'bg-emerald-500 text-white' :
-                    user.rank === 2 ? 'bg-gray-300 text-white' :
+                    user.rank === 2 ? 'bg-blue-500 text-white' :
                     user.rank === 3 ? 'bg-amber-600 text-white' :
                     'bg-gray-100 text-gray-500'
                   }`}>
@@ -132,7 +132,7 @@ export default function Leaderboard({ currentUserId }) {
                   </div>
                 </div>
 
-                <div className="col-span-3 text-right">
+                <div className="col-span-4 sm:col-span-3 text-right">
                   <div className={`text-2xl font-score font-bold ${user.rank === 1 ? 'text-emerald-600' : 'text-gray-800'}`}>
                     {user.points}
                   </div>

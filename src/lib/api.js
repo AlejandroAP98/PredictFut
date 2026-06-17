@@ -120,39 +120,32 @@ export function calculatePredictionScore(prediction, actualHome, actualAway) {
   const predHome = parseInt(prediction.home_score)
   const predAway = parseInt(prediction.away_score)
 
-  // Validación de seguridad
   if (isNaN(predHome) || isNaN(predAway)) return 0
 
   let score = 0
 
-  // Cálculos base
   const predDiff = predHome - predAway
   const actualDiff = actualHome - actualAway
 
-  // 1. Acierto de Tendencia (Ganador o Empate) - 5 Puntos
-  const sameTrend = 
-    (predDiff > 0 && actualDiff > 0) || // Ganó Local
-    (predDiff < 0 && actualDiff < 0) || // Ganó Visitante
-    (predDiff === 0 && actualDiff === 0) // Empate
-    
+  const sameTrend =
+    (predDiff > 0 && actualDiff > 0) ||
+    (predDiff < 0 && actualDiff < 0) ||
+    (predDiff === 0 && actualDiff === 0)
+
   if (sameTrend) {
     score += 5
   }
 
-  // 2. Acierto de Goles Individuales - 1 Punto por equipo
   const exactHome = predHome === actualHome
   const exactAway = predAway === actualAway
-  
+
   if (exactHome) score += 1
   if (exactAway) score += 1
 
-  // 3. Acierto de Diferencia de Goles - 1 Punto
-  // Solo aplicable si acertaron la diferencia (Ej: Predijo 2-0 y quedó 3-1)
   if (predDiff === actualDiff) {
     score += 1
   }
 
-  // 4. Bono de Pleno Exacto - 2 Puntos extra
   if (exactHome && exactAway) {
     score += 2
   }
