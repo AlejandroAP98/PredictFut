@@ -127,7 +127,7 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
       </div>
       {/* AI Dependencia section */}
       {!isTBD && !aiPrediction && !locked && !isFinished && prediction.home_score === '' && prediction.away_score === '' && (
-        <div className="mt-1 w-full sm:w-fit sm:mx-6 sm:px-0 px-28 ">
+        <div className="mt-1 w-full sm:w-fit sm:mx-6 sm:px-0 px-20 ">
           <button
             onClick={() => onGenerateAIPrediction && onGenerateAIPrediction(match.id)}
             className="w-full flex cursor-pointer items-center justify-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium border border-dashed border-emerald-300 text-emerald-600 hover:border-emerald-400 hover:text-emerald-700 hover:bg-emerald-50/50 transition-all"
