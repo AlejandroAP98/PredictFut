@@ -39,13 +39,13 @@ export default function ScoreRulesTooltip() {
               onClick={() => setShowSkills(false)}
               className={`text-sm font-semibold transition-colors pb-1 ${!showSkills ? 'text-gray-800 border-b-2 border-emerald-500' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              Puntaje
+              Habilidades
             </button>
             <button
               onClick={() => setShowSkills(true)}
               className={`text-sm font-semibold transition-colors pb-1 ${showSkills ? 'text-gray-800 border-b-2 border-emerald-500' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              Habilidades
+              Puntajes
             </button>
           </div>
 
