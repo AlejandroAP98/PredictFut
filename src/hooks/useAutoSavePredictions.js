@@ -24,9 +24,18 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
         away_score: pred.away_score,
       }))
 
+    const removedKeys = Object.keys(prevPredictionsRef.current)
+      .filter(matchId => !(matchId in current))
+
     const toDelete = changed
       .filter(([, pred]) => pred.home_score === '' && pred.away_score === '')
       .map(([matchId]) => matchId)
+      .concat(removedKeys)
+
+    if (toUpsert.length > 0 || toDelete.length > 0) {
+      const nextPrev = JSON.parse(JSON.stringify(current))
+      prevPredictionsRef.current = nextPrev
+    }
 
     if (toUpsert.length > 0) {
       await supabase
@@ -40,10 +49,6 @@ export function useAutoSavePredictions(userId, predictions, delay = 1500) {
         .delete()
         .eq('user_id', userId)
         .in('match_id', toDelete)
-    }
-
-    if (toUpsert.length > 0 || toDelete.length > 0) {
-      prevPredictionsRef.current = JSON.parse(JSON.stringify(current))
     }
   }, [userId])
 
