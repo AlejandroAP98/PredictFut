@@ -267,7 +267,7 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
         {predictionLocked && !isFinished && !isTBD && (
           <div className="text-center mt-3">
             <span className="text-[10px] sm:text-xs bg-red-50 text-red-500 px-3 py-1 rounded-full border border-red-100">
-              {locked ? 'Predictions locked - match in progress' : 'IA Dependencia'}
+              {locked ? 'Predictions locked - match in progress' : ''}
             </span>
           </div>
         )}
@@ -318,6 +318,23 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
             ) : null}
           </div>
         )}
+        {predictionLocked && !isFinished && equippedSkill && (() => {
+          const skillInfo = SKILL_CATALOG.find(s => s.id === equippedSkill.skill_id)
+          const colors = skillInfo ? RARITY_COLORS[skillInfo.rarity] : RARITY_COLORS.common
+          const skillConfig = equippedSkill.skill_config || {}
+          const teamLabel = skillConfig.team === 'home' ? 'Local' : skillConfig.team === 'away' ? 'Visita' : ''
+          return (
+            <div className="mt-2">
+              <div className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-semibold border ${colors.border} ${colors.bg} ${colors.text} opacity-70`}>
+                <span className="flex items-center gap-1.5">
+                  <SkillIcon icon={skillInfo?.icon} size={14} />
+                  <span>{skillInfo?.name}{teamLabel ? ` → ${teamLabel}` : ''}</span>
+                </span>
+                <span className="text-[10px] opacity-60">Activa</span>
+              </div>
+            </div>
+          )
+        })()}
       </div>
     </div>
   )
