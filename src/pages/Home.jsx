@@ -470,7 +470,6 @@ export default function Home() {
         equipped={equipped}
         totalActive={totalActive}
         onDiscard={handleDiscard}
-        onUnequip={handleUnequipSkill}
       />
     </div>
   )

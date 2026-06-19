@@ -12,7 +12,7 @@ const STAGES = {
   RESULT: 'result',
 }
 
-export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining, nextSpinCost, totalPoints, inventory, equipped, totalActive, onDiscard, onUnequip }) {
+export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining, nextSpinCost, totalPoints, inventory, equipped, totalActive, onDiscard }) {
   const [stage, setStage] = useState(STAGES.IDLE)
   const [result, setResult] = useState(null)
   const [spinError, setSpinError] = useState(null)
@@ -218,26 +218,20 @@ export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining,
                       if (!info) return null
                       const colors = RARITY_COLORS[info.rarity]
                       return (
-                        <div key={skill.id} className={`flex items-center justify-between p-3 rounded-xl border-2 ${colors.border} ${colors.bg} ${RARITY_GLOW[info.rarity] || ''}`}>
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <SkillIcon icon={info.icon} size={36} className={` ${colors.text} `} />
-                            <div className="min-w-0">
-                              <div className={`text-sm font-bold ${colors.text} truncate`}>{info.name}</div>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${colors.bg} ${colors.text} border ${colors.border}`}>
-                                  {RARITY_LABELS[info.rarity]}
-                                </span>
-                                <span className="text-[10px] text-gray-400">Partido: {skill.match_id?.slice(-6)}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => onUnequip(skill.id)}
-                            className="text-xs text-gray-400 underline underline-offset-2 cursor-pointer hover:text-red-500 transition-colors shrink-0 px-2 py-1.5 rounded-lg hover:bg-red-50 border border-transparent hover:border-red-200"
-                          >
-                            Desequipar
-                          </button>
-                        </div>
+                         <div key={skill.id} className={`flex items-center p-3 rounded-xl border-2 ${colors.border} ${colors.bg} ${RARITY_GLOW[info.rarity] || ''}`}>
+                           <div className="flex items-center gap-2.5 min-w-0">
+                             <SkillIcon icon={info.icon} size={36} className={` ${colors.text} `} />
+                             <div className="min-w-0">
+                               <div className={`text-sm font-bold ${colors.text} truncate`}>{info.name}</div>
+                               <div className="flex items-center gap-1.5 mt-0.5">
+                                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${colors.bg} ${colors.text} border ${colors.border}`}>
+                                   {RARITY_LABELS[info.rarity]}
+                                 </span>
+                                 <span className="text-[10px] text-gray-400">Partido: {skill.match_id?.slice(-6)}</span>
+                               </div>
+                             </div>
+                           </div>
+                         </div>
                       )
                     })}
                   </div>
