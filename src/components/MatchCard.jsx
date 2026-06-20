@@ -187,15 +187,19 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
               )}
             </div>
           </div>
-
-          <div className="flex items-center justify-center gap-2 sm:gap-3 shrink-0">
-            {isFinished ? (
-              <div className="flex items-center gap-2 sm:gap-3 bg-gray-50 rounded-xl px-4 sm:px-5 py-2 sm:py-3 border border-gray-100">
-                <span className={`text-2xl sm:text-3xl font-score font-bold ${actualHome > actualAway ? 'text-gray-800' : 'text-gray-400'}`}>{actualHome}</span>
-                <span className="text-base sm:text-lg text-gray-300 font-light">-</span>
-                <span className={`text-2xl sm:text-3xl font-score font-bold ${actualAway > actualHome ? 'text-gray-800' : 'text-gray-400'}`}>{actualAway}</span>
-              </div>
-            ) : (
+            <div className="flex flex-col items-center justify-center gap-1 shrink-0">
+             {isFinished ? (
+               <div className="flex flex-col items-center gap-1">
+                 <div className="flex items-center gap-2 sm:gap-3 bg-gray-50 rounded-xl px-4 sm:px-5 py-2 sm:py-3 border border-gray-100">
+                   <span className={`text-2xl sm:text-3xl font-score font-bold ${actualHome > actualAway ? 'text-gray-800' : 'text-gray-400'}`}>{actualHome}</span>
+                   <span className="text-base sm:text-lg text-gray-300 font-light">-</span>
+                   <span className={`text-2xl sm:text-3xl font-score font-bold ${actualAway > actualHome ? 'text-gray-800' : 'text-gray-400'}`}>{actualAway}</span>
+                 </div>
+                 {prediction.home_score !== '' && prediction.away_score !== '' && (
+                   <span className="font-score text-[9px] sm:text-xs text-gray-500 font-semibold">{prediction.home_score} - {prediction.away_score}</span>
+                 )}
+               </div>
+             ) : (
               <div className="flex items-center gap-1.5 sm:gap-2">
                 {aiPrediction && !isFinished ? (
                   <>
