@@ -34,7 +34,9 @@ export default function Home() {
   const [showMobileNav, setShowMobileNav] = useState(false)
   const [showGroups, setShowGroups] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [dataLoaded, setDataLoaded] = useState(false)
   const lastSavedRef = useRef({ points: -1, scores: '{}', bonuses: '{}', aiBonuses: '{}' })
+  const skillBonusesRef = useRef({})
 
   const {
     inventory, equipped, totalActive, equippedByMatch, spinsRemaining, nextSpinCost,
@@ -54,7 +56,7 @@ export default function Home() {
           .eq('user_id', user.id),
         supabase
           .from('scores')
-          .select('match_scores, skill_bonuses')
+          .select('match_scores, skill_bonuses, ai_bonuses')
           .eq('user_id', user.id)
           .maybeSingle(),
       ])
@@ -65,11 +67,16 @@ export default function Home() {
       })
       setPredictions(predMap)
 
+      skillBonusesRef.current = scoresRes.data?.skill_bonuses || {}
       if (scoresRes.data?.skill_bonuses) {
         setSkillBonuses(scoresRes.data.skill_bonuses)
       }
+      if (scoresRes.data?.ai_bonuses) {
+        setAiBonuses(scoresRes.data.ai_bonuses)
+      }
     } finally {
       setLoading(false)
+      setDataLoaded(true)
     }
   }, [user.id])
 
@@ -77,11 +84,12 @@ export default function Home() {
 
   useEffect(() => {
     if (matchesLoading) return
+    if (!dataLoaded) return
     const finishedMatches = allMatches.filter(m => m.finished === 'TRUE')
     if (finishedMatches.length === 0) return
 
     const newScores = {}
-    const newBonuses = { ...skillBonuses }
+    const newBonuses = { ...skillBonusesRef.current }
     let tp = 0
 
     for (const match of finishedMatches) {
@@ -123,6 +131,8 @@ export default function Home() {
     tp -= pointsSpent
 
     setScores(newScores)
+    skillBonusesRef.current = newBonuses
+    setSkillBonuses(newBonuses)
     setAiBonuses(newAIBonuses)
     setTotalPoints(tp)
 
@@ -132,8 +142,11 @@ export default function Home() {
     if (tp !== lastSavedRef.current.points || scoresStr !== lastSavedRef.current.scores || bonusesStr !== lastSavedRef.current.bonuses || aiBonusesStr !== lastSavedRef.current.aiBonuses) {
       lastSavedRef.current = { points: tp, scores: scoresStr, bonuses: bonusesStr, aiBonuses: aiBonusesStr }
       ;(async () => {
+        const matchScoresWithBonuses = Object.fromEntries(
+          Object.entries(newScores).map(([id, s]) => [id, s + (newBonuses[id] || 0)])
+        )
         await supabase.from('scores').upsert({
-          user_id: user.id, total_points: tp, match_scores: newScores,
+          user_id: user.id, total_points: tp, match_scores: matchScoresWithBonuses,
           skill_bonuses: newBonuses, ai_bonuses: newAIBonuses, updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
 
@@ -146,7 +159,7 @@ export default function Home() {
         }
       })()
     }
-  }, [allMatches, matchesLoading, predictions, equipped, skillBonuses, pointsSpent, refetchSkills, aiPredictions])
+  }, [allMatches, matchesLoading, predictions, equipped, pointsSpent, refetchSkills, aiPredictions, dataLoaded])
 
   const handlePredictionChange = (matchId, homeScore, awayScore) => {
     if (homeScore === '' && awayScore === '') {

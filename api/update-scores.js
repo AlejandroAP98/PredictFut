@@ -86,7 +86,7 @@ export default async function handler(req) {
     const [matchesRes, predsRes, skillsRes] = await Promise.all([
       fetch(`${API_BASE}/get/games`).then(r => r.json()),
       supabase.from('predictions').select('*'),
-      supabase.from('user_skills').select('*').eq('status', 'equipped'),
+      supabase.from('user_skills').select('*').in('status', ['equipped', 'consumed']),
     ])
 
     const matches = matchesRes.games || []
@@ -150,7 +150,7 @@ export default async function handler(req) {
     }
 
     const skillIdsToConsume = (skillsRes.data || [])
-      .filter(s => finishedMatchIds.has(s.match_id))
+      .filter(s => s.status === 'equipped' && finishedMatchIds.has(s.match_id))
       .map(s => s.id)
 
     if (skillIdsToConsume.length > 0) {
