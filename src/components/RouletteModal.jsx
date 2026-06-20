@@ -152,10 +152,10 @@ export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining,
 
               {spinError && (
                 <div className="w-full bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2 text-center">
-                  {spinError === 'Daily spin limit reached' ? 'Límite diario alcanzado (3/3 reclamos)' :
-                   spinError === 'Inventory full' ? 'Límite de 3 habilidades activas. Gasta o descarta una primero.' :
-                   spinError === 'Insufficient points' ? 'Puntos insuficientes.' :
-                   spinError}
+                  {spinError === 'Daily spin limit reached' ? 'Límite diario alcanzado (5/5)' :
+                  spinError === 'Inventory full' ? 'Límite de 5 habilidades activas. Gasta o descarta una primero.' :
+                  spinError === 'Insufficient points' ? 'Puntos insuficientes :(' :
+                  spinError}
                 </div>
               )}
 
@@ -170,7 +170,7 @@ export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining,
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  {spinsRemaining <= 0 ? 'Sin reclamos hoy :(' : totalActive >= MAX_INVENTORY_SIZE ? 'Límite de 3 habilidades' : nextSpinCost > 0 ? `Reclamar ( -${nextSpinCost} puntos )` : '¡Reclama tu recompensa!'}
+                  {spinsRemaining <= 0 ? 'Sin reclamos hoy :(' : totalActive >= MAX_INVENTORY_SIZE ? 'Límite de 5 habilidades' : nextSpinCost > 0 ? `Reclamar ( -${nextSpinCost} puntos )` : '¡Reclama tu recompensa!'}
                 </button>
               )}
               {stage === STAGES.LOADING && (
@@ -192,13 +192,13 @@ export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining,
                   }}
                   className="w-full py-3 rounded-xl cursor-pointer font-bold text-sm bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-200/50 active:scale-95 transition-all"
                 >
-                  {spinsRemaining > 0 ? '¡Reclamar otro!' : 'Ver inventario'}
+                  {spinsRemaining > 0 ? '¡Reclama otro! :)' : 'Ver inventario'}
                 </button>
               )}
 
               <div className="w-full">
                 <p className="text-[11px] text-gray-400 text-center">
-                  Reclamos: 1° gratis · 2° -2 pts · 3° -4 pts · Máximo 3 por día
+                  Reclamos: 1° gratis · 2° -2 pts · 3° -4 pts · 4° -6 pts · 5° -8 pts · Máximo 5 por día
                 </p>
               </div>
             </div>
@@ -273,7 +273,7 @@ export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining,
               </div>
 
               {totalActive >= MAX_INVENTORY_SIZE && (
-                <p className="text-[11px] text-amber-700 text-center">Límite de 3 habilidades activas. Gasta o descarta para reclamar de nuevo.</p>
+                <p className="text-[11px] text-amber-700 text-center">Límite de 5 habilidades activas. Gasta o descarta para reclamar de nuevo.</p>
               )}
             </div>
           )}

@@ -1,6 +1,8 @@
 import VarShieldIcon from '../assets/icons/VarShieldIcon'
 import TrendInsuranceIcon from '../assets/icons/TrendInsuranceIcon'
 import SniperTargetIcon from '../assets/icons/SniperTargetIcon'
+import HaramballIcon from '../assets/icons/HaramballIcon'
+import FutbolChampagneIcon from '../assets/icons/FutbolChampagneIcon'
 import DoubleImpactIcon from '../assets/icons/DoubleImpactIcon'
 import HandOfGodIcon from '../assets/icons/HandOfGodIcon'
 
@@ -9,7 +11,7 @@ export const SKILL_CATALOG = [
     id: 'var_shield',
     name: 'Escudo VAR',
     rarity: 'common',
-    dropRate: 0.40,
+    dropRate: 0.20,
     description: 'Perdona 1 gol de diferencia en un equipo para otorgar el punto de gol exacto.',
     requiresTeamChoice: true,
     icon: VarShieldIcon,
@@ -18,7 +20,7 @@ export const SKILL_CATALOG = [
     id: 'trend_insurance',
     name: 'Pacto de lima',
     rarity: 'common',
-    dropRate: 0.25,
+    dropRate: 0.20,
     description: 'Si fallas la predicción y el partido termina en empate, +2 pts de consolación.',
     requiresTeamChoice: false,
     icon: TrendInsuranceIcon,
@@ -27,10 +29,28 @@ export const SKILL_CATALOG = [
     id: 'local_visitor_bonus',
     name: 'Francotirador',
     rarity: 'rare',
-    dropRate: 0.20,
+    dropRate: 0.15,
     description: '+2 pts extra si aciertas exactamente los goles del equipo elegido.',
     requiresTeamChoice: true,
     icon: SniperTargetIcon,
+  },
+  {
+    id: 'haramball',
+    name: 'Haramball',
+    rarity: 'rare',
+    dropRate: 0.15,
+    description: 'Si el partido termina 1-0 o 0-1, +3 pts extra.',
+    requiresTeamChoice: false,
+    icon: HaramballIcon,
+  },
+  {
+    id: 'futbol_champagne',
+    name: 'Fútbol champagne',
+    rarity: 'rare',
+    dropRate: 0.15,
+    description: 'Si el partido tiene 5 o más goles en total, +3 pts extra.',
+    requiresTeamChoice: false,
+    icon: FutbolChampagneIcon,
   },
   {
     id: 'double_impact',
@@ -52,9 +72,9 @@ export const SKILL_CATALOG = [
   },
 ]
 
-export const SPIN_COSTS = { 1: 0, 2: 2, 3: 4 }
-export const MAX_DAILY_SPINS = 3
-export const MAX_INVENTORY_SIZE = 3
+export const SPIN_COSTS = { 1: 0, 2: 2, 3: 4, 4: 6, 5: 8 }
+export const MAX_DAILY_SPINS = 5
+export const MAX_INVENTORY_SIZE = 5
 export const AI_PREDICTION_BONUS = 3
 
 export const RARITY_COLORS = {
@@ -123,6 +143,14 @@ export function calculateSkillBonus(skillId, skillConfig, baseScore, prediction,
       const team = skillConfig?.team
       if (team === 'home' && exactHome) return 2
       if (team === 'away' && exactAway) return 2
+      return 0
+    }
+    case 'haramball': {
+      if ((actualHome === 1 && actualAway === 0) || (actualHome === 0 && actualAway === 1)) return 3
+      return 0
+    }
+    case 'futbol_champagne': {
+      if (actualHome + actualAway >= 5) return 3
       return 0
     }
     case 'double_impact': {

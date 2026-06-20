@@ -60,6 +60,14 @@ function calcSkillBonus(skillId, skillConfig, baseScore, pred, actualHome, actua
       if (team === 'away' && exactAway) return 2
       return 0
     }
+    case 'haramball': {
+      if ((actualHome === 1 && actualAway === 0) || (actualHome === 0 && actualAway === 1)) return 3
+      return 0
+    }
+    case 'futbol_champagne': {
+      if (actualHome + actualAway >= 5) return 3
+      return 0
+    }
     case 'double_impact': {
       return baseScore
     }

@@ -4,6 +4,8 @@ import DoubleImpactIcon from '../assets/icons/DoubleImpactIcon.tsx'
 import SniperTargetIcon from '../assets/icons/SniperTargetIcon.tsx'
 import TrendInsuranceIcon from '../assets/icons/TrendInsuranceIcon.tsx'
 import VarShieldIcon from '../assets/icons/VarShieldIcon.tsx'
+import HaramballIcon from '../assets/icons/HaramballIcon.tsx'
+import FutbolChampagneIcon from '../assets/icons/FutbolChampagneIcon.tsx'
 
 export default function ScoreRulesTooltip() {
   const [isOpen, setIsOpen] = useState(false)
@@ -54,22 +56,36 @@ export default function ScoreRulesTooltip() {
               <div className="flex items-center gap-2">
                 <VarShieldIcon size={20} className="text-gray-400" />
                 <div>
-                  <span className="text-xs text-gray-600"><strong className="text-gray-800">Escudo VAR</strong> <span className="text-gray-400">40%</span></span>
+                  <span className="text-xs text-gray-600"><strong className="text-gray-800">Escudo VAR</strong> <span className="text-gray-400">20%</span></span>
                   <p className="text-[10px] text-gray-400">Perdona 1 gol de diferencia en un equipo.</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <TrendInsuranceIcon size={20} className="text-gray-400"/>
                 <div>
-                  <span className="text-xs text-gray-600"><strong className="text-gray-800">Pacto de Lima</strong> <span className="text-gray-400">25%</span></span>
+                  <span className="text-xs text-gray-600"><strong className="text-gray-800">Pacto de Lima</strong> <span className="text-gray-400">20%</span></span>
                   <p className="text-[10px] text-gray-400">Si fallas y el partido es empate: +2 pts.</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <SniperTargetIcon size={20} className="text-blue-500"/>
                 <div>
-                  <span className="text-xs text-gray-600"><strong className="text-gray-800">Francotirador</strong> <span className="text-blue-500">20%</span></span>
+                  <span className="text-xs text-gray-600"><strong className="text-gray-800">Francotirador</strong> <span className="text-blue-500">15%</span></span>
                   <p className="text-[10px] text-gray-400">+2 pts si aciertas goles del equipo elegido.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <HaramballIcon size={20} className="text-blue-500"/>
+                <div>
+                  <span className="text-xs text-gray-600"><strong className="text-gray-800">Haramball</strong> <span className="text-blue-500">15%</span></span>
+                  <p className="text-[10px] text-gray-400">Si el partido queda 1-0 o 0-1: +3 pts.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <FutbolChampagneIcon size={20} className="text-blue-500"/>
+                <div>
+                  <span className="text-xs text-gray-600"><strong className="text-gray-800">Fútbol champagne</strong> <span className="text-blue-500">15%</span></span>
+                  <p className="text-[10px] text-gray-400">Si el partido tiene 5+ goles: +3 pts.</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -96,7 +112,7 @@ export default function ScoreRulesTooltip() {
                 </div>
               </div>
               <div className="mt-3 pt-2.5 border-t border-gray-100">
-                <p className="text-[10px] text-gray-400"><strong className="text-gray-500">3 reclamos/día</strong> · 1° gratis · 2° -2 pts · 3° -4 pts · Máx 3 en inventario · 1 por partido</p>
+                <p className="text-[10px] text-gray-400"><strong className="text-gray-500">5 reclamos/día</strong> · 1° gratis · 2° -2 pts · 3° -4 pts · 4° -6 pts · 5° -8 pts · Máx 5 en inventario · 1 por partido</p>
               </div>
             </div>
           ) : (
