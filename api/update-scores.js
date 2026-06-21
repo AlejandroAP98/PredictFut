@@ -146,11 +146,21 @@ export default async function handler(req) {
       spentByUser[row.user_id] = (spentByUser[row.user_id] || 0) + (row.points_spent || 0)
     }
 
+    const scoresRes = await supabase
+      .from('scores')
+      .select('user_id, granted_points')
+
+    const grantedByUser = {}
+    for (const row of (scoresRes.data || [])) {
+      grantedByUser[row.user_id] = row.granted_points || 0
+    }
+
     for (const [userId, data] of Object.entries(userScores)) {
       const pointsSpent = spentByUser[userId] || 0
+      const granted = grantedByUser[userId] || 0
       await supabase.from('scores').upsert({
         user_id: userId,
-        total_points: data.total - pointsSpent,
+        total_points: data.total + granted - pointsSpent,
         match_scores: data.match_scores,
         skill_bonuses: data.skill_bonuses,
         updated_at: new Date().toISOString(),

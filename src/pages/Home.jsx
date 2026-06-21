@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useSound } from '../hooks/useSound'
 import { supabase } from '../lib/supabase'
 import { formatDateKey, isMatchLocked, calculatePredictionScore } from '../lib/api'
 import { calculateSkillBonus, AI_PREDICTION_BONUS } from '../lib/skills'
@@ -29,6 +30,7 @@ export default function Home() {
   const [skillBonuses, setSkillBonuses] = useState({})
   const [aiBonuses, setAiBonuses] = useState({})
   const [totalPoints, setTotalPoints] = useState(0)
+  const [grantedPoints, setGrantedPoints] = useState(0)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [showRoulette, setShowRoulette] = useState(false)
   const [showMobileNav, setShowMobileNav] = useState(false)
@@ -37,11 +39,16 @@ export default function Home() {
   const [dataLoaded, setDataLoaded] = useState(false)
   const lastSavedRef = useRef({ points: -1, scores: '{}', bonuses: '{}', aiBonuses: '{}' })
   const skillBonusesRef = useRef({})
+  const [playSilbido] = useSound('/sounds/silbido.mp3')
+  const prevLockedRef = useRef({})
+  const firstLockCheckRef = useRef(true)
 
   const {
-    inventory, equipped, totalActive, equippedByMatch, spinsRemaining, nextSpinCost,
+    skills, inventory, equipped, totalActive, equippedByMatch, spinsRemaining, nextSpinCost,
     pointsSpent, spin, equipSkill, unequipSkill, discardSkill, refetch: refetchSkills,
   } = useSkills(user.id)
+
+  const equippedAndConsumed = equipped.concat(skills.filter(s => s.status === 'consumed'))
 
   const { predictions: aiPredictions, generate: generateAIPrediction, cancel: cancelAIPrediction, getPrediction: getAIPrediction, calculateBonuses: calculateAIBonuses } = useAIPredictions(user.id)
 
@@ -49,7 +56,7 @@ export default function Home() {
 
   const fetchUserData = useCallback(async () => {
     try {
-      const [predsRes, scoresRes] = await Promise.all([
+      const [predsRes, scoresRes, grantedRes] = await Promise.all([
         supabase
           .from('predictions')
           .select('*')
@@ -57,6 +64,11 @@ export default function Home() {
         supabase
           .from('scores')
           .select('match_scores, skill_bonuses, ai_bonuses')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('scores')
+          .select('granted_points')
           .eq('user_id', user.id)
           .maybeSingle(),
       ])
@@ -74,6 +86,7 @@ export default function Home() {
       if (scoresRes.data?.ai_bonuses) {
         setAiBonuses(scoresRes.data.ai_bonuses)
       }
+      setGrantedPoints(grantedRes.data?.granted_points || 0)
     } finally {
       setLoading(false)
       setDataLoaded(true)
@@ -81,6 +94,37 @@ export default function Home() {
   }, [user.id])
 
   useEffect(() => { fetchUserData() }, [fetchUserData])
+
+  useEffect(() => {
+    if (matchesLoading) return
+    if (allMatches.length === 0) return
+
+    const currentLocked = {}
+    for (const match of allMatches) {
+      currentLocked[match.id] = isMatchLocked(match)
+    }
+
+    if (firstLockCheckRef.current) {
+      firstLockCheckRef.current = false
+      prevLockedRef.current = currentLocked
+      return
+    }
+
+    let anyNewlyLocked = false
+    for (const match of allMatches) {
+      const wasLocked = prevLockedRef.current[match.id] || false
+      if (!wasLocked && currentLocked[match.id]) {
+        anyNewlyLocked = true
+        break
+      }
+    }
+
+    prevLockedRef.current = currentLocked
+
+    if (anyNewlyLocked) {
+      playSilbido()
+    }
+  }, [allMatches, matchesLoading, playSilbido])
 
   useEffect(() => {
     if (matchesLoading) return
@@ -102,8 +146,8 @@ export default function Home() {
       }
     }
 
-    for (const skill of equipped) {
-      if (skill.status === 'equipped' && skill.match_id && newScores[skill.match_id] !== undefined) {
+    for (const skill of equippedAndConsumed) {
+      if ((skill.status === 'equipped' || skill.status === 'consumed') && skill.match_id && newScores[skill.match_id] !== undefined) {
         const pred = predictions[skill.match_id]
         const match = finishedMatches.find(m => m.id === skill.match_id)
         if (!pred || !match) continue
@@ -129,6 +173,7 @@ export default function Home() {
     }
 
     tp -= pointsSpent
+    tp += grantedPoints
 
     setScores(newScores)
     skillBonusesRef.current = newBonuses
@@ -159,7 +204,7 @@ export default function Home() {
         }
       })()
     }
-  }, [allMatches, matchesLoading, predictions, equipped, pointsSpent, refetchSkills, aiPredictions, dataLoaded])
+  }, [allMatches, matchesLoading, predictions, equippedAndConsumed, pointsSpent, refetchSkills, aiPredictions, dataLoaded, grantedPoints])
 
   const handlePredictionChange = (matchId, homeScore, awayScore) => {
     if (homeScore === '' && awayScore === '') {

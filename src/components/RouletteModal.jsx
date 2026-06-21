@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSound } from '../hooks/useSound'
 import { SKILL_CATALOG, RARITY_COLORS, RARITY_LABELS, RARITY_GLOW, MAX_INVENTORY_SIZE } from '../lib/skills'
 import SkillIcon from './SkillIcon'
 import RewardIcon from '../assets/icons/RewardIcon'
@@ -19,6 +20,9 @@ export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining,
   const [activeTab, setActiveTab] = useState('spin')
   const [lastCost, setLastCost] = useState(0)
   const claimRef = useRef(null)
+  const [playCoin] = useSound('/sounds/coin.mp3')
+  const [playMachine, stopMachine] = useSound('/sounds/machine.mp3', { loop: true })
+  const [playSkill] = useSound('/sounds/skill.mp3')
 
   useEffect(() => {
     if (!isOpen) {
@@ -27,11 +31,24 @@ export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining,
       setSpinError(null)
       setActiveTab('spin')
       setLastCost(0)
+      stopMachine()
       if (claimRef.current) clearTimeout(claimRef.current)
     }
-  }, [isOpen])
+  }, [isOpen, stopMachine])
+
+  useEffect(() => {
+    if (stage === STAGES.LOADING) {
+      playMachine()
+    } else if (stage === STAGES.RESULT) {
+      stopMachine()
+      playSkill()
+    } else if (stage === STAGES.IDLE) {
+      stopMachine()
+    }
+  }, [stage, playMachine, stopMachine, playSkill])
 
   const handleClaim = useCallback(async () => {
+    playCoin()
     setSpinError(null)
     setResult(null)
     setStage(STAGES.LOADING)
@@ -62,7 +79,7 @@ export default function RouletteModal({ isOpen, onClose, onSpin, spinsRemaining,
     setLastCost(spinResult.cost || 0)
     setResult({ skill: wonSkill })
     setStage(STAGES.RESULT)
-  }, [onSpin])
+  }, [onSpin, playCoin])
 
   if (!isOpen) return null
 
