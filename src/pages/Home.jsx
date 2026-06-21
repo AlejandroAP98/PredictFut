@@ -390,7 +390,7 @@ export default function Home() {
           <div className="flex flex-col items-center w-full justify-between gap-1">
             <div className="grid grid-cols-3 gap-2 sm:w-1/2">
               <div className="bg-white/60 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center border border-gray-200">
-                <div className="text-amber-600 font-bold text-lg font-score leading-tight">{totalPoints}{totalSkillBonuses > 0 || totalAIBonuses > 0 ? <span className="text-amber-400 text-xs"> ({totalSkillBonuses > 0 ? `+${totalSkillBonuses}hab` : ''}{totalSkillBonuses > 0 && totalAIBonuses > 0 ? ', ' : ''}{totalAIBonuses > 0 ? `+${totalAIBonuses}IA` : ''})</span> : null}</div>
+                <div className="text-amber-600 font-bold text-lg font-score leading-tight">{totalPoints}</div>
                 <div className="text-amber-500 font-bold text-[10px] font-score uppercase tracking-wide">Puntos</div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm rounded-lg px-3 py-1.5 text-center border border-gray-200">
