@@ -271,7 +271,7 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
         {predictionLocked && !isFinished && !isTBD && (
           <div className="text-center mt-3">
             <span className="text-[10px] sm:text-xs bg-red-50 text-red-500 px-3 py-1 rounded-full border border-red-100">
-              {locked ? 'Predictions locked - match in progress' : ''}
+              {locked ? 'Predictions locked - match in progress' : 'Prediction saved'}
             </span>
           </div>
         )}
