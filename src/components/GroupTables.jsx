@@ -23,7 +23,7 @@ export default function GroupTables({ groups, loading, getTeamInfo }) {
     <div className="animate-fadeIn relative z-10">
       <div className="text-center mb-4">
         <h2 className="text-3xl font-bold text-gray-800 mb-2">Fase de Grupos</h2>
-        <p className="text-gray-500 text-sm">Posiciones y resultados de cada grupo</p>
+        <p className="text-gray-500 text-xs">Posiciones y resultados de cada grupo</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

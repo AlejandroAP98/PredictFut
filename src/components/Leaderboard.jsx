@@ -58,7 +58,7 @@ export default function Leaderboard({ currentUserId }) {
     <div className="animate-fadeIn relative z-10">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800 mb-2">Ranking Global</h2>
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 text-xs">
           {users.length} jugador{users.length !== 1 ? 'es' : ''} compitiendo
         </p>
       </div>
@@ -94,10 +94,10 @@ export default function Leaderboard({ currentUserId }) {
 
                 <div className="col-span-7 sm:col-span-5 flex items-center gap-2 min-w-0">
                   <div className={`w-9 h-9 flex rounded-full items-center justify-center text-sm font-bold shrink-0 ${
-                    user.rank === 1 ? 'bg-emerald-500 text-white' :
-                    user.rank === 2 ? 'bg-blue-500 text-white' :
+                    user.rank === 1 ? 'bg-amber-300 text-white' :
+                    user.rank === 2 ? 'bg-gray-300 text-white' :
                     user.rank === 3 ? 'bg-amber-600 text-white' :
-                    'bg-gray-100 text-gray-500'
+                    'bg-emerald-100 text-gray-600'
                   }`}>
                     {user.name.charAt(0).toUpperCase()}
                   </div>
@@ -122,10 +122,10 @@ export default function Leaderboard({ currentUserId }) {
                   <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-1000 ease-out ${
-                        user.rank === 1 ? 'bg-emerald-500' :
-                        user.rank === 2 ? 'bg-gray-400' :
+                        user.rank === 1 ? 'bg-amber-300' :
+                        user.rank === 2 ? 'bg-gray-300' :
                         user.rank === 3 ? 'bg-amber-600' :
-                        'bg-gray-300'
+                        'bg-emerald-200'
                       }`}
                       style={{ width: `${Math.max(user.barWidth, 2)}%` }}
                     />
