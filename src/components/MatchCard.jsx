@@ -61,13 +61,14 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
 
   const homeId = match.home_team_id
   const awayId = match.away_team_id
+  const home_scorers = match.home_scorers || null
+  const away_scorers = match.away_scorers || null
   const homeFlag = getFlag ? getFlag(homeId) : null
   const awayFlag = getFlag ? getFlag(awayId) : null
   const homeName = getName ? getName(homeId) : (match.home_team_name_en || match.home_team_label || 'TBD')
   const awayName = getName ? getName(awayId) : (match.away_team_name_en || match.away_team_label || 'TBD')
   const group = match.group || ''
   const matchType = match.type || 'group'
-
   const isFinished = match.finished === 'TRUE'
   const isLive = !isFinished && match.time_elapsed !== 'notstarted'
   const actualHome = isFinished ? parseInt(match.home_score) : null
@@ -93,6 +94,19 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
     )
   }
 
+  const parseScorers = (scorersStr) => {
+    if (!scorersStr || scorersStr === 'null' || scorersStr === '{}') return [];
+    try {
+      const jsonFormat = scorersStr.replace(/^\{/, '[').replace(/\}$/, ']');
+      return JSON.parse(jsonFormat);
+    } catch (error) {
+      console.error("Error al parsear los goleadores:", error);
+      return [];
+    }
+  };
+
+  const homeScorers = parseScorers(home_scorers); 
+  const awayScorers = parseScorers(away_scorers);
   const isTBD = !homeId || homeId === '0' || !awayId || awayId === '0'
 
   return (
@@ -171,7 +185,17 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
           </div>
         </div>
       )}
-      <div className="p-3 sm:p-5">
+      <div className="p-3 sm:p-5 flex flex-col">
+        <div className="flex flex-wrap gap-1 justify-start pb-2">
+          {homeScorers?.length > 0 ? 
+            homeScorers?.map((scorer, index) => (
+            <div key={index} className="relative group">
+             <span className="inline-flex items-center gap-1 bg-gray-50 text-gray-500 text-[9px] px-2 py-1 rounded-xl  border border-gray-200">
+                {scorer}
+              </span>
+            </div>
+          )) : null}
+        </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="flex sm:flex-1 items-center justify-between sm:justify-end sm:gap-3 min-w-0">
             <div className="flex items-center gap-2 sm:flex-row-reverse min-w-0">
@@ -262,7 +286,16 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
             </div>
           </div>
         </div>
-
+        <div className="flex flex-wrap gap-1 justify-end pt-2">
+          {awayScorers?.length > 0 ? 
+            awayScorers?.map((scorer, index) => (
+            <div key={index} className="relative group">
+              <span className="inline-flex items-center gap-1 bg-gray-50 text-gray-500 text-[9px] px-2 py-1 rounded-xl  border border-gray-200">
+                {scorer}
+              </span>
+            </div>
+          )) : null}
+        </div>
         {isTBD && (
           <div className="text-center mt-3">
             <span className="text-[10px] sm:text-xs bg-gray-100 text-gray-400 px-3 py-1 rounded-full">Teams to be determined</span>
@@ -339,6 +372,7 @@ export default function MatchCard({ match, prediction, score, skillBonus, aiBonu
             </div>
           )
         })()}
+        
       </div>
     </div>
   )
